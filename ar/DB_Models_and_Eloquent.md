@@ -11,16 +11,16 @@
 - [تغيير اسم العامود](#column-name-change)
 - [تعديل شكل نتائج الاستعلام](#map-query-results)
 - [تغيير أسماء الحقول الزمنية](#change-default-timestamp-fields)
-- [Quick Order by created_at](#quick-order-by-created_at)
-- [Automatic Column Value When Creating Records](#automatic-column-value-when-creating-records)
-- [DB Raw Query Calculations Run Faster](#db-raw-query-calculations-run-faster)
-- [More than One Scope](#more-than-one-scope)
-- [No Need to Convert Carbon](#no-need-to-convert-carbon)
-- [Grouping by First Letter](#grouping-by-first-letter)
-- [Never Update the Column](#never-update-the-column)
-- [Find Many](#find-many)
-- [Find Many and return specific columns](#find-many-and-return-specific-columns)
-- [Find by Key](#find-by-key)
+- [ ترتيب سريع حسب زمن الانشاء](#quick-order-by-created_at)
+- [قيمة تلقائية للحقول عند الانشاء](#automatic-column-value-when-creating-records)
+- [الحسابات في الاستعلامات الخام تكون أسرع](#db-raw-query-calculations-run-faster)
+- [أكثر من مجال (scope) واحد](#more-than-one-scope)
+- [لا حاجة لتحويل الصيغ عند استعمال Carbon](#no-need-to-convert-carbon)
+- [تجميع النتائج باستخدام أول حرف من الاسم](#grouping-by-first-letter)
+- [منع تغيير قيمة العامود](#never-update-the-column)
+- [الحصول على عدة سجلات باستخدام Find](#find-many)
+- [الحصول على أعمدة محددة باستخدام Find](#find-many-and-return-specific-columns)
+- [البحث باستخدام المفتاح الأساسي](#find-by-key)
 - [Use UUID instead of auto-increment](#use-uuid-instead-of-auto-increment)
 - [Sub-selects in Laravel Way](#sub-selects-in-laravel-way)
 - [Hide Some Columns](#hide-some-columns)
@@ -235,34 +235,38 @@ class Role extends Model
 }
 ```
 
-### Quick Order by created_at
+<a name="quick-order-by-created_at"></a>
+###  ترتيب سريع حسب زمن الانشاء
 
-Instead of:
+بدلاً من استخدام الأسلوب التقليدي القديم:
 ```php
 User::orderBy('created_at', 'desc')->get();
 ```
 
-You can do it quicker:
+يمكنك الحصول على نفس النتيجة بشكل أسرع:
 ```php
 User::latest()->get();
 ```
 
-By default, `latest()` will order by `created_at`.
+بشكل افتراضي تقوم الطريقة `()latest` بالترتيب اعتماداً على العامود `created_at`.
 
-There is an opposite method `oldest()` which would order by `created_at` ascending:
+يوجد نظير لهذه الطريقة ايضاً حيث يقوم بالترتيب اعتماداً على نفس العامود ولكن تصاعدياً وهي الطريقة `()oldest`.
 ```php
 User::oldest()->get();
 ```
+كما يمكنك تحديد الترتيب بنائاً على عامود مختلف يمكنك تمرريه كوسيط للطريقة، فعلى سبيل المثال للحصول على أخر مستخدم تم تحديثه (الترتيب على عامود `updated_at`): 
 
-Also, you can specify another column to order by. For example, if you want to use `updated_at`, you can do this:
 ```php
 $lastUpdatedUser = User::latest('updated_at')->first();
 ```
 
-### Automatic Column Value When Creating Records
+<a name="automatic-column-value-when-creating-records"></a>
+### قيمة تلقائية للحقول عند الانشاء
 
-If you want to generate some DB column value when creating record, add it to model's `boot()` method.
-For example, if you have a field "position" and want to assign the next available position to the new record (like `Country::max('position') + 1)`, do this:
+اذا كنت تريد انشاء حقل يتم وضع قيمته تلقائياً عند انشاء سجل جديد، قم باضافة آلية الحصول على القيمة داخل الطريقة `()boot` في النموذج. 
+
+على سبيل المثال، اذا أردت أن يتم اسناد الحقل `position` تلقائياً عند انشاء سجل جديد بحيث تكون قيمته`Country::max('position') + 1` نقوم بما يلي: 
+
 
 ```php
 class Country extends Model {
@@ -277,9 +281,13 @@ class Country extends Model {
 }
 ```
 
-### DB Raw Query Calculations Run Faster
+<a name="db-raw-query-calculations-run-faster"></a>
+### الحسابات في الاستعلامات الخام تكون أسرع
 
-Use SQL raw queries like `whereRaw()` method, to make some DB-specific calculations directly in query, and not in Laravel, usually the result will be faster. Like, if you want to get users that were active 30+ days after their registration, here's the code:
+استعمل استعلامات خام (raw queries) للقيام بحسابات مباشرة على قاعدة البيانات، غالباً ما تكون النتيجة أسرع.
+يمكنك استعمال الطريقة `()whereRaw` لكتابة الاستعلام الخام.
+
+كمثال اذا أردت الحصول على المستخدمين الذين كانو نشطين بعد 30 يوماً من تسجيلهم يمكنك ذلك بالشكل الآتي:
 
 ```php
 User::where('active', 1)
@@ -287,11 +295,12 @@ User::where('active', 1)
     ->get();
 ```
 
-### More than One Scope
+<a name="more-than-one-scope"></a>
+### أكثر من مجال (scope) واحد
 
-You can combine and chain Query Scopes in Eloquent, using more than one scope in a query.
+يمكنك دمج أكثر من مجال (scope) كسلسلة للحصول على نتيجة استعلام أفضل:
 
-Model:
+في ملف النموذج (Model):
 ```php
 public function scopeActive($query) {
     return $query->where('active', 1);
@@ -302,34 +311,41 @@ public function scopeRegisteredWithinDays($query, $days) {
 }
 ```
 
-Some Controller:
+في ملف المتحكم (Controller):
 ```php
 $users = User::registeredWithinDays(30)->active()->get();
 ```
 
-### No Need to Convert Carbon
+<a name="no-need-to-convert-carbon"></a>
+### لا حاجة لتحويل الصيغ عند استعمال Carbon 
 
-If you're performing `whereDate()` and check today's records, you can use Carbon's `now()` and it will automatically be transformed to date. No need to do `->toDateString()`.
+اذا كنت تقوم باستعلام باستخدام الطريقة `()whereDate` باستخدام التابع `()now` الخاص بـ Carbon، سيتم تلقائياً تحويل نتيجة التابع `()now` إلى النمط string دون الحاجة لاستخدام التابع `()toDateString`. 
+
 
 ```php
-// Instead of
+// بدلاً من هذه الطريقة
 $todayUsers = User::whereDate('created_at', now()->toDateString())->get();
-// No need to convert, just use now()
+//  فقط قم باستخدامه بشكل مباشر
 $todayUsers = User::whereDate('created_at', now())->get();
 ```
 
-### Grouping by First Letter
+<a name="grouping-by-first-letter"></a>
+### تجميع النتائج باستخدام أول حرف من الاسم
 
-You can group Eloquent results by any custom condition, here's how to group by first letter of user's name:
+يمكنك تجميع نتائج استعلام Eloquent بأي شرط مخصص، فعلى سبيل المثال يمكنك تجميع المستخدمين بنائاً على أول حرف بأسمائهم بالأسلوب الآتي: 
+
 ```php
 $users = User::all()->groupBy(function($item) {
     return $item->name[0];
 });
 ```
 
-### Never Update the Column
+<a name="never-update-the-column"></a>
+### منع تغيير قيمة العامود
 
-If you have DB column which you want to be set only once and never updated again, you can set that restriction on Eloquent Model, with a mutator:
+في حال كنت تود جعل أحد الأعمدة غير قابل للتغير بعد أن يتم ادخاله عند الانشاء يمكنك القيام بذلك بالاسلوب الآتي:
+
+
 ```php
 class User extends Model
 {
@@ -344,47 +360,56 @@ class User extends Model
 }
 ```
 
-### Find Many
+<a name="find-many"></a>
+### الحصول على عدة سجلات باستخدام Find
 
-Eloquent method `find()` may accept multiple parameters, and then it returns a Collection of all records found, not just one Model:
+يمكن للطريقة `()find` الحصول على عدة نتائج غبر تمرير عدة وسطاء: 
+
+
 ```php
-// Will return Eloquent Model
+// سيتم إعادة نتيجة واحدة
 $user = User::find(1);
-// Will return Eloquent Collection
+// سيتم إعادة مجموعة من النتائج
 $users = User::find([1,2,3]);
 ```
 ```php
 return Product::whereIn('id', $this->productIDs)->get();
-// You can do this
+// يمكنك القيام بذلك عوضاً عن  الطريقة السابقة
 return Product::find($this->productIDs)
 ```
 
-Tip given by [@tahiriqbalnajam](https://twitter.com/tahiriqbalnajam/status/1436120403655671817)
+ تم تقديم الحيلة بواسطة  [tahiriqbalnajam@](https://twitter.com/tahiriqbalnajam/status/1436120403655671817)
 
-Incase of integer, use `whereIn` with limited data range only instead use `whereIntegerInRaw` which is faster then `whereIn`.
+يمكنك استخدام الطريقة `whereIntegerInRaw` مع نمط integer عوضاً عن `whereIn` لأنها **أسرع**. 
 
 ```php
 Product::whereIn('id', range(1, 50))->get();
-// You can do this
+// بأسلوب أسرع
 Product::whereIntegerInRaw('id', range(1, 50))->get();
 ```
 
-Tip given by [@sachinkiranti](https://raisachin.com.np)
+ تم تقديم الحيلة بواسطة [sachinkiranti@](https://raisachin.com.np)
 
-### Find Many and return specific columns
 
-Eloquent method `find()` may accept multiple parameters, and then it returns a Collection of all records found with specificied columns, not all columns of model:
+<a name="find-many-and-return-specific-columns"></a>
+### الحصول على أعمدة محددة باستخدام Find 
+
+كما يمكن للطريقة `()find` إعادة بعض الحقول فقط عبر تمرير أسماء الحقول كوسيط ثانٍ: 
+
 ```php
-// Will return Eloquent Model with first_name and email only
+// سيتم إعادة اسم المستخدم والبريد الالكتروني للسجل 1
 $user = User::find(1, ['first_name', 'email']);
-// Will return Eloquent Collection with first_name and email only
+// سيتم إعادة اسم المستخدم والبريد الاكتروني للمستخدمين 1 و 2 و3
 $users = User::find([1,2,3], ['first_name', 'email']);
 ```
-Tip given by [@tahiriqbalnajam](https://github.com/tahiriqbalnajam)
+ تم تقديم الحيلة بواسطة [tahiriqbalnajam@](https://github.com/tahiriqbalnajam)
 
-### Find by Key
 
-You can also find multiple records with `whereKey()` method which takes care of which field is exactly your primary key (`id` is the default but you may override it in Eloquent model):
+<a name="find-by-key"></a>
+### البحث باستخدام المفتاح الأساسي
+
+يمكنك أيضاً استعادة عدة سجلات عن طريق المفتاح الأساسي (primary key) في جدول فاعدة البيانات باستخدام الطريقة `()whereKey` (غالباً ما يكون المفتاح الأساسي للجدول هو `id`): 
+
 
 ```php
 $users = User::whereKey([1,2,3])->get();
