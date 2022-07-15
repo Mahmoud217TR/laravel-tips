@@ -1,16 +1,16 @@
 ## DB Models and Eloquent
 
-⬆️ [Go to main menu](README.md#laravel-tips) ➡️ [Next (Models Relations)](Models_Relations.md)
-- [Reuse or clone query](#reuse-or-clone-query)
-- [Eloquent where date methods](#eloquent-where-date-methods)
-- [Increments and decrements](#increments-and-decrements)
-- [No timestamp columns](#no-timestamp-columns)
-- [Soft-deletes: multiple restore](#soft-deletes-multiple-restore)
-- [Model all: columns](#model-all-columns)
-- [To Fail or not to Fail](#to-fail-or-not-to-fail)
-- [Column name change](#column-name-change)
-- [Map query results](#map-query-results)
-- [Change Default Timestamp Fields](#change-default-timestamp-fields)
+⬆️ [العودة للقائمة الرئيسية](README.md#laravel-tips) ⬅️ [التالي (Models Relations)](Models_Relations.md)
+- [إعادة استخدام أو نسخ استعلام](#reuse-or-clone-query)
+- [طرق استعلامات Eloquent الخاصة بالتاريخ](#eloquent-where-date-methods)
+- [التزايد والتناقص](#increments-and-decrements)
+- [إزالة الحقول الزمنية](#no-timestamp-columns)
+- [استعادة عدة سجلات من الحذف المؤقت](#soft-deletes-multiple-restore)
+- [تحديد أغمدة مع الطريقة all](#model-all-columns)
+- [العثور على نتيجة أو 404](#to-fail-or-not-to-fail)
+- [تغيير اسم العامود](#column-name-change)
+- [تعديل شكل نتائج الاستعلام](#map-query-results)
+- [تغيير أسماء الحقول الزمنية](#change-default-timestamp-fields)
 - [Quick Order by created_at](#quick-order-by-created_at)
 - [Automatic Column Value When Creating Records](#automatic-column-value-when-creating-records)
 - [DB Raw Query Calculations Run Faster](#db-raw-query-calculations-run-faster)
@@ -90,11 +90,14 @@
 - [Select specific columns](#select-specific-columns)
 - [Chain conditional clauses to the query without writing if-else statements](#chain-conditional-clauses-to-the-query-without-writing-if-else-statements)
 
-### Reuse or clone query()
+<a name="reuse-or-clone-query"></a>
+### إعادة استخدام أو نسخ استعلام
 
-Typically, we need to query multiple time from a filtered query. So, most of the time we use `query()` method,
+في العادة عندما نحتاج لتطبيق عدة استعلامات على استعلام مفلتر (filtered query).
+فغالباً ما نقوم باستخدام الطريقة `()query`.
 
-let's write a query for getting today created active and inactive products
+لنقم بكتابة استعلام للحصول على المنتجات النشطة (active) وغير النشطة (inactive) التي تم انشائها اليوم.
+
 
 ```php
 
@@ -106,25 +109,28 @@ if($today){
     $query->where('created_at', $today);
 }
 
-// lets get active and inactive products
-$active_products = $query->where('status', 1)->get(); // this line modified the $query object variable
-$inactive_products = $query->where('status', 0)->get(); // so here we will not find any inactive products
+// الآن لنستعلم عن المنتجات النشطة وغير النشطة
+$active_products = $query->where('status', 1)->get(); // $query في هذا السطر قمنا بالتعديل على المتحول 
+$inactive_products = $query->where('status', 0)->get(); // بالتالي هنا لن يتم الحصول على أي منتجات غير نشطة
 ```
+لكن، بعد الحصول على المنتجات النشطة `active products$` سيتم تغيير قيمة المتحول ` query$`. بالتالي عند الاستعلام عن المنتجات غير النشطة لن يحتوي `inactive_products$` على أي منتجات من المتحول ` query$` وسيعيد مجموعة (collection) فارغة في كل مرة.
+السبب، أنه في كل مرة نبحث عن منتجات غير نشطة باستعلام يعيد المنتجات النشطة فقط.
 
-But, after getting `$active products` the` $query `will be modified. So, `$inactive_products` will not find any inactive products from `$query`  and that will return blank collection every time. Cause, that will try to find inactive products from `$active_products` (`$query` will return active products only).
+لنحل هذه المشكلة يمكننا الاستعلام عدة مرات عبر إعادة استخدام الغرض ` query$`. بالتالي سنحتاج لنسخ الغرض ` query$` قبل أن يتم تعديلها بالشكل الآتي: 
 
-For solve this issue, we can query multiple time by reusing this `$query` object.
-So, We need to clone this `$query` before doing any `$query` modification action.
 
 ```php
-$active_products = $query->clone()->where('status', 1)->get(); // it will not modify the $query
-$inactive_products = $query->clone()->where('status', 0)->get(); // so we will get inactive products from $query
+$active_products = $query->clone()->where('status', 1)->get(); // $query لن يتم تعديل الغرض
+$inactive_products = $query->clone()->where('status', 0)->get(); // $query بالتالي سنحصل على المنتجات غير النشطة بواسطة الغرض
 
 ```
 
-### Eloquent where date methods
+<a name="eloquent-where-date-methods"></a>
+### طرق استعلامات Eloquent الخاصة بالتاريخ
 
-In Eloquent, check the date with functions `whereDay()`, `whereMonth()`, `whereYear()`, `whereDate()` and `whereTime()`.
+باستعلامات Eloquent، يمكنك الحصول على النتائج باستخدام طرق التاريخ التالية: 
+
+ `()whereDay()`, `whereMonth()`, `whereYear()`, `whereDate()`,  `whereTime`.
 
 ```php
 $products = Product::whereDate('created_at', '2018-01-31')->get();
@@ -134,18 +140,26 @@ $products = Product::whereYear('created_at', date('Y'))->get();
 $products = Product::whereTime('created_at', '=', '14:13:58')->get();
 ```
 
-### Increments and decrements
+<a name="increments-and-decrements"></a>
+### التزايد والتناقص
 
-If you want to increment some DB column in some table, just use `increment()` function. Oh, and you can increment not only by 1, but also by some number, like 50.
+اذا أردت زيادة قيمة في عامود بجدول ضمن قاعدة البيانات. فقط قم باستخدام التابع `()increment`. أما في حال كنت تريده أن تنقص القيمة فقم باستخدام التابع `()decrement`.
+
+بشكل افتراضي يكون مقدار التناقص أو التزايد 1، لكن يمكن تعديله عبر تمرير قيمة كوسيط ثانٍ مثل القيمة 50.
+
 
 ```php
 Post::find($post_id)->increment('view_count');
 User::find($user_id)->increment('points', 50);
+
+Post::find($post_id)->decrement('view_count')
 ```
 
-### No timestamp columns
+<a name="no-timestamp-columns"></a>
+### إزالة الحقول الزمنية
 
-If your DB table doesn't contain timestamp fields `created_at` and `updated_at`, you can specify that Eloquent model wouldn't use them, with `$timestamps = false` property.
+في حال كون جدول قاعدة البيانات الخاص بالنموذج لا يحتوي على حقول زمنية (`created_at` و `updated_at`) يمكنك التصريح للنموذج بعدم استخدامهم عبر اسناد `timestamps = false$`. 
+
 
 ```php
 class Company extends Model
@@ -154,41 +168,51 @@ class Company extends Model
 }
 ```
 
-### Soft-deletes: multiple restore
+<a name="soft-deletes-multiple-restore"></a>
+### استعادة عدة سجلات من الحذف المؤقت
 
-When using soft-deletes, you can restore multiple rows in one sentence.
+عندما تستعمل الحذف المؤقت (soft-delete)، يمكنك استعادة عدة سجلات دفعة واحدة.
+
 
 ```php
 Post::onlyTrashed()->where('author_id', 1)->restore();
 ```
 
-### Model all: columns
+<a name="model-all-columns"></a>
+### تحديد مجموعة أعمدة مع الطريقة all
 
-When calling Eloquent's `Model::all()`, you can specify which columns to return.
+عند استدعاء الطريقة `()Model::all` على نموذج يمكنك تحديد الأعمدة المطلوبة فقط عبر تمريرها كوسيط للطريقة.
+
 
 ```php
 $users = User::all(['id', 'name', 'email']);
 ```
 
-### To Fail or not to Fail
+<a name="to-fail-or-not-to-fail"></a>
+### العثور على نتيجة أو 404
 
-In addition to `findOrFail()`, there's also Eloquent method `firstOrFail()` which will return 404 page if no records for query are found.
+بالإضافة للطريقة `()findOrFail` يوجد أيضاً طريقة Eloquent وهي `()firstOrFail` اللتان تعيدان صفحة لم يتم العثور على المطلوب 404 في حال لم يتم اعادة أي سجل بالاستعلام.
+
 
 ```php
 $user = User::where('email', 'povilas@laraveldaily.com')->firstOrFail();
 ```
 
-### Column name change
 
-In Eloquent Query Builder, you can specify "as" to return any column with a different name, just like in plain SQL query.
+<a name="column-name-change"></a>
+### تغيير اسم العامود
+
+في باني الاستعلامات (Eloquent Query Builder) يمكنك تحديد اسم جديد لعامود عند الاستعلام عن سجل تماماً كما في استعلام SQL العادي.
+
 
 ```php
 $users = DB::table('users')->select('name', 'email as user_email')->get();
 ```
 
-### Map query results
+<a name="map-query-results"></a>
+### تعديل شكل نتائج الاستعلام
+يمكنك تعديل شكل نتائج استعلام Eloquent باستخدام التابع `()map` الخاص بالمجموعات (Collections). 
 
-After Eloquent query you can modify rows by using `map()` function in Collections.
 
 ```php
 $users = User::where('role_id', 1)->get()->map(function (User $user) {
@@ -197,9 +221,11 @@ $users = User::where('role_id', 1)->get()->map(function (User $user) {
 });
 ```
 
-### Change Default Timestamp Fields
+<a name="change-default-timestamp-fields"></a>
+### تغيير أسماء الحقول الزمنية
 
-What if you’re working with non-Laravel database and your timestamp columns are named differently? Maybe, you have create_time and update_time. Luckily, you can specify them in the model, too:
+في حال كنت تتعامل مع قاعدة بيانات غير تابعة لـLaravel وكانت أسماء الحقول الزمنية مختلفة، يمكنك لحسن الحظ تحديد الأسماء الخاصة بالحقول الزمنية:
+
 
 ```php
 class Role extends Model
