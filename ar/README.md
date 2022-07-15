@@ -7,6 +7,7 @@
 هل أعجبتك الحيل؟ تفقد [دروس لارافيل](https://laraveldaily.teachable.com/?utm_source=github&utm_campaign=laravel-tips) المميزة.
 
 تمت الترجمة بواسطة [MahmoudTR@](https://github.com/Mahmoud217TR?tab=overview&from=2022-07-01&to=2022-07-15)
+
 ---
 
 متوفر باللغة الصينية:
