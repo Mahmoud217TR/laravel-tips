@@ -20,6 +20,9 @@ Hey, like these tips? Also, check out my premium [Laravel courses](https://larav
 Or if you want the Chinese version:
 [中文版本](https://github.com/Lysice/laravel-tips-chinese/blob/master/README-zh.md)
 
+Or if you want the Arabic version:
+[نصائح لارافيل](/ar/README.md)
+
 ---
 
 **Update 14 July 2022**: Currently there are **314 tips** divided into 14 sections.
