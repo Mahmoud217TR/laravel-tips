@@ -21,16 +21,16 @@
 - [الحصول على عدة سجلات باستخدام Find](#find-many)
 - [الحصول على أعمدة محددة باستخدام Find](#find-many-and-return-specific-columns)
 - [البحث باستخدام المفتاح الأساسي](#find-by-key)
-- [Use UUID instead of auto-increment](#use-uuid-instead-of-auto-increment)
-- [Sub-selects in Laravel Way](#sub-selects-in-laravel-way)
-- [Hide Some Columns](#hide-some-columns)
-- [Exact DB Error](#exact-db-error)
-- [Soft-Deletes with Query Builder](#soft-deletes-with-query-builder)
-- [Good Old SQL Query](#good-old-sql-query)
-- [Use DB Transactions](#use-db-transactions)
-- [Update or Create](#update-or-create)
-- [Forget Cache on Save](#forget-cache-on-save)
-- [Change Format of Created_at and Updated_at](#change-format-of-created_at-and-updated_at)
+- [استخدم uuid بدلاً من الزيادة التلقائية](#use-uuid-instead-of-auto-increment)
+- [التحديد الجزئي (Sub-Selects) بأسلوب لارافيل](#sub-selects-in-laravel-way)
+- [إخفاء بعض الأعمدة](#hide-some-columns)
+- [التقاط أخطاء SQL](#exact-db-error)
+- [الإزالة المؤقتة (Soft-Delete) باستخدام باني الاستعلامات](#soft-deletes-with-query-builder)
+- [تنفيذ استعلامات SQL ](#good-old-sql-query)
+- [استعمل DB Transactions](#use-db-transactions)
+- [التحديث أو الإنشاء](#update-or-create)
+- [ازالة المفتاح من الكاش عند الحفظ](#forget-cache-on-save)
+- [تغيير صيغة حقلي created_at و updated_a](#change-format-of-created_at-and-updated_at)
 - [Storing Array Type into JSON](#storing-array-type-into-json)
 - [Make a Copy of the Model](#make-a-copy-of-the-model)
 - [Reduce Memory](#reduce-memory)
@@ -415,11 +415,12 @@ $users = User::find([1,2,3], ['first_name', 'email']);
 $users = User::whereKey([1,2,3])->get();
 ```
 
-### Use UUID instead of auto-increment
+<a name="use-uuid-instead-of-auto-increment"></a>
+### استخدم uuid بدلاً من الزيادة التلقائية
 
-You don't want to use auto incrementing ID in your model?
+هل تفضل عدم استخدام الزيادة التلقائية في حقل id في لارافيل؟ يمكنك استخدام uuid عوضاً عنها
 
-Migration:
+في ملف Migration:
 ```php
 Schema::create('users', function (Blueprint $table) {
     // $table->increments('id');
@@ -427,7 +428,7 @@ Schema::create('users', function (Blueprint $table) {
 });
 ```
 
-Model:
+في ملف Model:
 ```php
 class User extends Model
 {
@@ -450,9 +451,11 @@ class User extends Model
 }
 ```
 
-### Sub-selects in Laravel Way
+<a name="sub-selects-in-laravel-way"></a>
+### التحديد الجزئي (Sub-Selects) بأسلوب لارافيل
 
-From Laravel 6, you can use addSelect() in Eloquent statement, and do some calculation to that added column.
+من إصدار لارافيل 6 فما فوق يمكنك استخدام الطريقة `()addSelect` في استعلامات Eloquent لاداء حسابات اضافية لعمود مضاف. 
+
 
 ```php
 return Destination::addSelect(['last_flight' => Flight::select('name')
@@ -462,57 +465,67 @@ return Destination::addSelect(['last_flight' => Flight::select('name')
 ])->get();
 ```
 
-### Hide Some Columns
+<a name="hide-some-columns"></a>
+### إخفاء بعض الأعمدة
 
-When doing Eloquent query, if you want to hide specific field from being returned, one of the quickest ways is to add `->makeHidden()` on Collection result.
+اذا أردت اخفاء بعض الأعمدة عند الاستعلام فأحد أسرع الطرق هي استعمال الطريقة `()makeHidden<-`على المجموعة (Collection) الناتجة: 
+
 
 ```php
 $users = User::all()->makeHidden(['email_verified_at', 'deleted_at']);
 ```
 
-### Exact DB Error
+<a name="exact-db-error"></a>
+### التقاط أخطاء SQL
 
-If you want to catch Eloquent Query exceptions, use specific `QueryException` instead default Exception class, and you will be able to get the exact SQL code of the error.
+اذا أردت التقاط الاستثناءات الخاصة باستعلامات Eloquent يمكنك استخدام الصف `QueryException` بدلاً من صف الاستثناءات الافتراضي، ستصبح قادراً على التقاط الاستثناءات الخاصة بأخطاء SQL. 
+
 
 ```php
 try {
-    // Some Eloquent/SQL statement
+    // Eloquent/SQL استعلام
 } catch (\Illuminate\Database\QueryException $e) {
-    if ($e->getCode() === '23000') { // integrity constraint violation
+    if ($e->getCode() === '23000') { // (integrity constraint violation) انتهاك لقيد السلامة 
         return back()->withError('Invalid data');
     }
 }
 ```
 
-### Soft-Deletes with Query Builder
+<a name="soft-deletes-with-query-builder"></a>
+### الإزالة المؤقتة (Soft-Delete) باستخدام باني الاستعلامات
 
-Don't forget that soft-deletes will exclude entries when you use Eloquent, but won't work if you use Query Builder.
+لا تنسى أن االاستعلام باستخدام Eloquent سيقوم تلقائياً باستبعاد السجلات المحذوفة مؤقتاً، أما في حالة باني الاستعلامات (Query Builder) فلن يقوم باستبعاد السجلات المحذوفة مؤقتاً. 
+
 
 ```php
-// Will exclude soft-deleted entries
+// سيتم استبعاد السجلات المحذوفة مؤقتاً
 $users = User::all();
 
-// Will NOT exclude soft-deleted entries
+// لن يتم استبعاد السجلات المحذوفة مؤقتاً
 $users = User::withTrashed()->get();
 
-// Will NOT exclude soft-deleted entries
+// أيضاً لن يتم استبعاد السجلات المحذوفة مؤقتاً
 $users = DB::table('users')->get();
 ```
 
-### Good Old SQL Query
+<a name="good-old-sql-query"></a>
+### تنفيذ استعلامات SQL 
 
-If you need to execute a simple SQL query, without getting any results - like changing something in DB schema, you can just do `DB::statement()`.
+اذا كنت تود تنفيذ استعلام SQL بسيط بدون استعادة أي نتيجة (مثل تنفيذ تعديل مخطط قاعدة البيانات) يمكنك استخدام `()DB::statement`.
+
 
 ```php
 DB::statement('DROP TABLE users');
 DB::statement('ALTER TABLE projects AUTO_INCREMENT=123');
 ```
 
-### Use DB Transactions
+<a name="use-db-transactions"></a>
+### استعمل DB Transactions
 
-If you have two DB operations performed, and second may get an error, then you should rollback the first one, right?
+اذا كنت تطبق عمليتين على قاعدة البيانات، وفي حال قامت الثانية باحداث خطأ، فمن المفترض أن تقوم بالتراجع عن التغيير الحاصل في العملية الأولى.
 
-For that, I suggest to use DB Transactions, it's really easy in Laravel:
+لهذا الغرض أنصح باستخدام `DB::transaction` فهي سهلة الاستعمال في لارافيل: 
+
 
 ```php
 DB::transaction(function () {
@@ -522,12 +535,14 @@ DB::transaction(function () {
 });
 ```
 
-### Update or Create
+<a name="update-or-create"></a>
+### التحديث أو الإنشاء 
 
-If you need to check if the record exists, and then update it, or create a new record otherwise, you can do it in one sentence - use Eloquent method `updateOrCreate()`:
+اذا كنت تحتاج لتحديث سجل في حال وجوده، أو انشاءه في حال عدم وجوده يمكنك القيام بذلك باستخدام الطريقة `()updateOrCreate`: 
+
 
 ```php
-// Instead of this
+// بدلاً من هذا الأسلوب
 $flight = Flight::where('departure', 'Oakland')
     ->where('destination', 'San Diego')
     ->first();
@@ -541,23 +556,22 @@ if ($flight) {
 	    'discounted' => 1
 	]);
 }
-// Do it in ONE sentence
+// يمكنك القيام بنفس العملية السابقة بطريقة أسهل
 $flight = Flight::updateOrCreate(
     ['departure' => 'Oakland', 'destination' => 'San Diego'],
     ['price' => 99, 'discounted' => 1]
 );
 ```
 
-### Forget Cache on Save
+<a name="forget-cache-on-save"></a>
+### ازالة المفتاح من الكاش عند الحفظ
+اذا كان لديك مفتاح في الكاش (cache)، وليكن `posts` على سبيل المثال، يقوم باعطاء مجموعة (collection) وكنت تريد ازالة هذا المفتاح عند أي تخزين أو تحديث جديد يمكنك استعمال التابع الستاتيكي `saved` على النموذج الخاص بك كما يلي: 
 
-Tip given by [@pratiksh404](https://github.com/pratiksh404)
-
-If you have cache key like `posts` that gives collection, and you want to forget that cache key on new store or update, you can call static `saved` function on your model:
 
 ```php
 class Post extends Model
 {
-    // Forget cache key on storing or updating
+    // قم بإزالة المفتاح من الكاش عند أي تخزين أو تحديث
     public static function boot()
     {
         parent::boot();
@@ -567,30 +581,35 @@ class Post extends Model
     }
 }
 ```
+تم تقديم هذه الحيلة بواسطة [pratiksh404@](https://github.com/pratiksh404)
 
-### Change Format Of Created_at and Updated_at
 
-Tip given by [@syofyanzuhad](https://github.com/syofyanzuhad)
+<a name="change-format-of-created_at-and-updated_at"></a>
+### تغيير صيغة حقلي created_at و updated_at
 
-To change the format of `created_at` you can add a method in your model like this:
+لتغيير صيغة الحقل `created_at` يمكنك اضافة طريقة في ملف النموذج بالشكل الآتي: 
+
+
 ```php
 public function getCreatedAtFormattedAttribute()
 {
-   return $this->created_at->format('H:i d, M Y');
+   return $this->created_at->format('H:i d_M Y');
 }
 ```
-So you can use it `$entry->created_at_formatted` when it's needed.
-It will return the `created_at` attribute like this: `04:19 23, Aug 2020`.
+وبعدها يمكنك استخدام الصيغة بالشكل `entry->created_at_formatted$`، حيث سيتم إعادة قيمة `created_at` بالشكل `2020 Aug`ـ`23 04:19` على سبيل المثال.
 
-And also for changing format of `updated_at` attribute, you can add this method :
+
+كما يمكنك تغيير صيغة حقل `updated_at` بنفس الطريقة:
 ```php
 public function getUpdatedAtFormattedAttribute()
 {
-   return $this->updated_at->format('H:i d, M Y');
+   return $this->updated_at->format('H:i d_M Y');
 }
 ```
-So you can use it `$entry->updated_at_formatted` when it's needed.
-It will return the `updated_at` attribute like this: `04:19 23, Aug 2020`.
+وبعدها يمكنك استخدام الصيغة بالشكل `entry->updated_at_formatted$`، حيث سيتم إعادة قيمة `updated_at` بالشكل `2020 Aug`ـ`23 04:19` على سبيل المثال.
+
+تم تقديم هذه الحيلة بواسطة [syofyanzuhad@](https://github.com/syofyanzuhad)
+
 
 ### Storing Array Type into JSON
 
