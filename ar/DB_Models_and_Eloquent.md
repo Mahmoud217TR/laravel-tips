@@ -31,16 +31,16 @@
 - [التحديث أو الإنشاء](#update-or-create)
 - [ازالة المفتاح من الكاش عند الحفظ](#forget-cache-on-save)
 - [تغيير صيغة حقلي created_at و updated_a](#change-format-of-created_at-and-updated_at)
-- [Storing Array Type into JSON](#storing-array-type-into-json)
-- [Make a Copy of the Model](#make-a-copy-of-the-model)
-- [Reduce Memory](#reduce-memory)
-- [Force query without $fillable/$guarded](#force-query-without-fillableguarded)
-- [3-level structure of parent-children](#3-level-structure-of-parent-children)
-- [Perform any action on failure](#perform-any-action-on-failure)
-- [Check if record exists or show 404](#check-if-record-exists-or-show-404)
-- [Abort if condition failed](#abort-if-condition-failed)
-- [Perform any extra steps before deleting model](#perform-any-extra-steps-before-deleting-model)
-- [Fill a column automatically while you persist data to the database](#fill-a-column-automatically-while-you-persist-data-to-the-database)
+- [تخزين المصفوفات بصيغة JSON](#storing-array-type-into-json)
+- [استنساخ النموذج](#make-a-copy-of-the-model)
+- [تخفيف الذاكرة](#reduce-memory)
+- [التنفيذ القسري للاستعلام مع تجاهل fillable و guarded](#force-query-without-fillableguarded)
+- [بنى علائقية بثلاث مستويات](#3-level-structure-of-parent-children)
+- [إظهار صفحة 404 عند اخفاق عملية البحث](#check-if-record-exists-or-show-404)
+- [تنفيذ أوامر عند اخفاق عملية البحث](#perform-any-action-on-failure)
+- [الإنهاء في حال فشل الشرط](#abort-if-condition-failed)
+- [انجاز خطوات إضافية قبل الحذف](#perform-any-extra-steps-before-deleting-model)
+- [ملئ عمود تلقائياً أثناء الادخال](#fill-a-column-automatically-while-you-persist-data-to-the-database)
 - [Extra information about the query](#extra-information-about-the-query)
 - [Using the doesntExist() method in Laravel](#using-the-doesntexist-method-in-laravel)
 - [Trait that you want to add to a few Models to call their boot() method automatically](#trait-that-you-want-to-add-to-a-few-models-to-call-their-boot-method-automatically)
@@ -611,11 +611,13 @@ public function getUpdatedAtFormattedAttribute()
 تم تقديم هذه الحيلة بواسطة [syofyanzuhad@](https://github.com/syofyanzuhad)
 
 
-### Storing Array Type into JSON
+<a name="storing-array-type-into-json"></a>
+### تخزين المصفوفات بصيغة JSON 
 
-Tip given by [@pratiksh404](https://github.com/pratiksh404)
+اذا كنت تمتلك حقل دخل يأخذ مصفوفة ويجب عليك تخزينه بصيغة JSON، يمكنك استخدام الخاصية `casts$` في النموذج الخاص بذلك الحقل.
 
-If you have input field which takes an array and you have to store it as a JSON, you can use `$casts` property in your model. Here `images` is a JSON attribute.
+على سبيل المثال الحقل `images` هنا هو متحول من نمط JSON: 
+
 
 ```php
 protected $casts = [
@@ -623,13 +625,18 @@ protected $casts = [
 ];
 ```
 
-So you can store it as a JSON, but when retrieved from DB, it can be used as an array.
+بهذه الحالة سيتم تخزينه على شكل JSON ولكن عند طلبه سيتم تحويله لمصفوفة. 
 
-### Make a Copy of the Model
+تم تقديم هذه الحيلة بواسطة [pratiksh404@](https://github.com/pratiksh404)
 
-If you have two very similar Models (like shipping address and billing address) and you need to make a copy of one to another, you can use `replicate()` method and change some properties after that.
 
-Example from the [official docs](https://laravel.com/docs/8.x/eloquent#replicating-models):
+<a name="make-a-copy-of-the-model"></a>
+### استنساخ النموذج
+
+اذا كان لديك نموذجين متشابهين (مثل: عنوان الدفع billing address، وعنوان الشحن shipping address) ويجب عليك نسخ احداهما للآخر، يمكنك استخدام الطريقة `()replicate` مع تغيير بعض الخواص بعدها. 
+
+
+المثال من [توثيق لارافيل](https://laravel.com/docs/8.x/eloquent#replicating-models):
 
 ```php
 $shipping = Address::create([
@@ -647,35 +654,57 @@ $billing = $shipping->replicate()->fill([
 $billing->save();
 ```
 
-### Reduce Memory
 
-Sometimes we need to load a huge amount of data into memory. For example:
+<a name="reduce-memory"></a>
+### تخفيف الذاكرة
+
+في بعض الأحيان قد تحتاج لتحميل كمية كبيرة من البيانات للذاكرة، على سبيل المثال:
+
 ```php
 $orders = Order::all();
 ```
-But this can be slow if we have really huge data, because Laravel prepares objects of the Model class.
-In such cases, Laravel has a handy function `toBase()`
+
+لكن هذه العملية قد تكون بطيئة في حال كنا نملك بيانات كبيرة الحجم، وذلك لأن لارافيل تقوم بتجهيزها ككائنات من نمط النموذج.
+في مثل هذه الحالات قم باستخدام التابع اليدوي `()toBase` :
+
 
 ```php
 $orders = Order::toBase()->get();
-//$orders will contain `Illuminate\Support\Collection` with objects `StdClass`.
+// StdClass مجموعة من نمط $orders سيعيد المتحول
 ```
-By calling this method, it will fetch the data from the database, but it will not prepare the Model class.
-Keep in mind it is often a good idea to pass an array of fields to the get method, preventing all fields to be fetched from the database.
+باستخدام هذا الأسلوب سيتم استعادة البيانات من قاعدة البيانات، ولكن لن يتم تهيئتها ككائنات من نمط النموذج.
+تذكر بأن هذا الأسلوب غالباً هو فكرة جيدة لتمرير مصفوفة من الحقول للطريقة get كي تمنع جلب كل الحقول من قاعدة البيانات.
 
-### Force query without $fillable/$guarded
-If you create a Laravel boilerplate as a "starter" for other devs, and you're not in control of what THEY would later fill in Model's $fillable/$guarded, you may use forceFill()
+
+<a name="force-query-without-fillableguarded"></a>
+### التنفيذ القسري  للاستعلام مع تجاهل fillable و guarded
+
+اذا قمت بانشاء مشروع لارافيل نمطي كبداية لمطورين اخرين، فلن تتحكم بما سيقومون بوضعه لاحقاً في الخاصية `fillable$` أو الخاصية `guarded$` الخاصة بالنماذج، يمكنك عندها استخدام الطريقة `()forceFill`. 
+
+
+
 ```php
 $team->update(['name' => $request->name])
 ```
-What if "name" is not in Team model's `$fillable`? Or what if there's no `$fillable/$guarded` at all?
+
+ماذا لو لم تكن الخاصية `name` ضمن `fillable$`؟ أو لو لم يكن هناك لا `fillable$` ولا `guarded$` على الإطلاق؟؟ 
+
+الحل باستخدام الطريقة `()forceFill`: 
 ```php
 $team->forceFill(['name' => $request->name])
 ```
-This will "ignore" the `$fillable` for that one query and will execute no matter what.
+بهذا الأسلوب سيتم تجاهل `fillable$` لهذا الاستعلام فقط وسيتم تنفيذه قسرياً. 
 
-### 3-level structure of parent-children
-If you have a 3-level structure of parent-children, like categories in an e-shop, and you want to show the number of products on the third level, you can use `with('yyy.yyy')` and then add `withCount()` as a condition
+
+<a name="3-level-structure-of-parent-children"></a>
+### بنى علائقية بثلاث مستويات
+
+في حال كنت تمتلك بنية علائقية بثلاث مستويات، (مثل: التصنيفات في متجر الكتروني) وكنت تود عرض عدد المنتجات في المستوى الثالث (التصنيفات الجزئية) يمكنك استخدام ` with('yyy.yyy')` ومن ثم استخدام `()withCount`. 
+
+
+في ملف المتحكم Controller:
+
+
 ```php
 class HomeController extend Controller
 {
@@ -689,6 +718,9 @@ class HomeController extend Controller
     }
 }
 ```
+
+في ملف النموذج Model:
+
 ```php
 class Category extends Model
 {
@@ -703,7 +735,10 @@ class Category extends Model
     }
 }
 ```
-```php
+
+في ملف الواجهة:
+
+```blade
 <ul>
     @foreach($categories as $category)
         <li>
@@ -729,17 +764,14 @@ class Category extends Model
 </ul>
 ```
 
-### Perform any action on failure
-When looking for a record, you may want to perform some actions if it's not found.
-In addition to `->firstOrFail()` which just throws 404, you can perform any action on failure, just do `->firstOr(function() { ... })`
-```php
-$model = Flight::where('legs', '>', 3)->firstOr(function () {
-    // ...
-})
-```
 
-### Check if record exists or show 404
-Don't use find() and then check if the record exists. Use findOrFail().
+<a name="check-if-record-exists-or-show-404"></a>
+### إظهار صفحة 404 عند اخفاق عملية البحث
+
+عليك فقط القيام باستخدام الطريقة `()findOrFail` عوضاً عن الطريقة `()find`.
+
+الأسلوب التقليدي القديم والطويل:
+
 ```php
 $product = Product::find($id);
 if (!$product) {
@@ -747,46 +779,72 @@ if (!$product) {
 }
 $product->update($productDataArray);
 ```
-Shorter way
+الأسلوب الأفضل والأقصر باستخدام الطريقة `()findOrFail`:
 ```php
 $product = Product::findOrFail($id); // shows 404 if not found
 $product->update($productDataArray);
 ```
 
-### Abort if condition failed
-`abort_if()` can be used as shorter way to check condition and throw an error page.
+
+<a name="perform-any-action-on-failure"></a>
+### تنفيذ أوامر عند اخفاق عملية البحث
+
+عند البحث عن سجل، قد تود تنفيذ مجموعة تعليمات في حال لم يتم العثور عليه.
+بالإضافة للطريقة `()firstOrFail<-` التي تقوم برمي استثناء 404، يمكنك تنفيذ أي مجموعة من التعليمات باستخدام الطريقة `()firstOr<-`:
+
+```php
+$model = Flight::where('legs', '>', 3)->firstOr(function () {
+    //  مجموعة التعليمات التي تود تنفيذها في حالة عدم العثور على السجل
+})
+```
+
+
+<a name="abort-if-condition-failed"></a>
+### الإنهاء في حال فشل الشرط
+
+الإنهاء العمليات (abort) في حال فشل اختبار شرط ما يمكنك استعمال التابع `()abort_if` بدلاً من هذا الأسلوب: 
+
+
 ```php
 $product = Product::findOrFail($id);
 if($product->user_id != auth()->user()->id){
     abort(403);
 }
 ```
-Shorter way
+الأسلوب الأقصر باستخدام التابع `()abort_if`:
+
 ```php
 /* abort_if(CONDITION, ERROR_CODE) */
 $product = Product::findOrFail($id);
 abort_if ($product->user_id != auth()->user()->id, 403)
 ```
 
-### Perform any extra steps before deleting model
+<a name="perform-any-extra-steps-before-deleting-model"></a>
+### انجاز خطوات إضافية قبل الحذف
 
-Tip given by [@back2Lobby](https://github.com/back2Lobby)
+يمكنك استخدام الطريقة `()Model::delete` في الطريقة `delete` عند التجاوز (overridde) للقيام ببعض الخطوات الإضافية قبل الحذف. 
 
-We can use `Model::delete()` in the overridden delete method to perform additional steps.
 ```php
-// App\Models\User.php
+// App\Models\User.php في ملف
 
 public function delete(){
 
-	//extra steps here whatever you want
+	//الخطوات الإضافية المراد تنفيذها قبل الحذف
 	
-	//now perform the normal deletion
+	//بعدها نقوم بتنفيذ عملية الحذف
 	Model::delete();
 }
 ```
 
-### Fill a column automatically while you persist data to the database
-If you want to fill a column automatically while you persist data to the database (e.g: slug) use Model Observer instead of hard code it every time
+تم تقديم هذه الحيلة بواسطة [back2Lobby@](https://github.com/back2Lobby)
+
+
+<a name="fill-a-column-automatically-while-you-persist-data-to-the-database"></a>
+### ملئ عمود تلقائياً أثناء الادخال
+
+اذا كنت تود ملئ أحد الأعمدة تلقائياً أثناء عملية الادخال لقاعدة البيانات (مثل: slug) يمكنك استخدام الـ Observer الخاص بالنموذج عوضاً عن كتابتها بشكل يدوي بكل مرة. 
+
+
 ```php
 use Illuminate\Support\Str;
 
@@ -804,7 +862,8 @@ class Article extends Model
 }
 ```
 
-Tip given by [@sky_0xs](https://twitter.com/sky_0xs/status/1432390722280427521)
+تم تقديم هذه الحيلة بواسطة [sky_0xs@](https://twitter.com/sky_0xs/status/1432390722280427521)
+
 
 ### Extra information about the query
 You can call the `explain()` method on queries to know extra information about the query.
