@@ -41,16 +41,16 @@
 - [الإنهاء في حال فشل الشرط](#abort-if-condition-failed)
 - [انجاز خطوات إضافية قبل الحذف](#perform-any-extra-steps-before-deleting-model)
 - [ملئ عمود تلقائياً أثناء الادخال](#fill-a-column-automatically-while-you-persist-data-to-the-database)
-- [Extra information about the query](#extra-information-about-the-query)
-- [Using the doesntExist() method in Laravel](#using-the-doesntexist-method-in-laravel)
-- [Trait that you want to add to a few Models to call their boot() method automatically](#trait-that-you-want-to-add-to-a-few-models-to-call-their-boot-method-automatically)
-- [There are two common ways of determining if a table is empty in Laravel](#there-are-two-common-ways-of-determining-if-a-table-is-empty-in-laravel)
-- [How to prevent “property of non-object” error](#how-to-prevent-property-of-non-object-error)
-- [Get original attributes after mutating an Eloquent record](#get-original-attributes-after-mutating-an-eloquent-record)
-- [A simple way to seed a database](#a-simple-way-to-seed-a-database)
-- [The crossJoinSub method of the query constructor](#the-crossJoinSub-method-of-the-query-constructor)
-- [Order by Pivot Fields](#order-by-pivot-fields)
-- [Belongs to Many Pivot table naming](#belongs-to-many-pivot-table-naming)
+- [معلومات اضافية عن الاستعلام](#extra-information-about-the-query)
+- [استخدام الطريقة ()doesntExist في لارافيل](#using-the-doesntexist-method-in-laravel)
+- [سمات تود اضافتها للنماذج عند تشغيل الطريقة boot بشكل تلقائي](#trait-that-you-want-to-add-to-a-few-models-to-call-their-boot-method-automatically)
+- [أسلوبان لمعرفة فيما اذا كان الجدول فارغ في قاعدة البيانات](#there-are-two-common-ways-of-determining-if-a-table-is-empty-in-laravel)
+- [كيفية منع الخطأ من نمط “property of non-object”](#how-to-prevent-property-of-non-object-error)
+- [الحصول على القيم الأصلية للسجل بعد تعديله](#get-original-attributes-after-mutating-an-eloquent-record)
+- [أسلوب بسيط لملئ (seeding) قاعدة البيانات](#a-simple-way-to-seed-a-database)
+- [استعمال لطريقة crossJoinSub الخاصة بباني الاستعلامات](#the-crossJoinSub-method-of-the-query-constructor)
+- [تسمية الجداول الخاصة بعلاقة Belongs to Many](#belongs-to-many-pivot-table-naming)
+- [الترتيب حسب الحقول المحورية Pivot Fields](#order-by-pivot-fields)
 - [Find a single record from a database](#find-a-single-record-from-a-database)
 - [Automatic records chunking](#automatic-records-chunking)
 - [Updating the model without dispatching events](#updating-the-model-without-dispatching-events)
@@ -865,11 +865,17 @@ class Article extends Model
 تم تقديم هذه الحيلة بواسطة [sky_0xs@](https://twitter.com/sky_0xs/status/1432390722280427521)
 
 
-### Extra information about the query
-You can call the `explain()` method on queries to know extra information about the query.
+<a name="extra-information-about-the-query"></a>
+###  معلومات اضافية عن الاستعلام
+
+للحصول على معلومات اضافية عن أي استعلام يمكنك استخدام الطريقة `()explain` بالشكل الآتي:
+
+
 ```php
 Book::where('name', 'Ruskin Bond')->explain()->dd();
 ```
+
+النتيجة: 
 
 ```php
 Illuminate\Support\Collection {#5344
@@ -892,29 +898,38 @@ Illuminate\Support\Collection {#5344
 }
 ```
 
-Tip given by [@amit_merchant](https://twitter.com/amit_merchant/status/1432277631320223744)
+تم تقديم هذه الحيلة بواسطة [amit_merchant@](https://twitter.com/amit_merchant/status/1432277631320223744)
 
-### Using the doesntExist() method in Laravel
+
+<a name="using-the-doesntexist-method-in-laravel"></a>
+### استخدام الطريقة ()doesntExist في لارافيل
 ```php
-// This works
+// الأسلوب التقليدي
 if ( 0 === $model->where('status', 'pending')->count() ) {
 }
 
-// But since I don't care about the count, just that there isn't one
-// Laravel's exists() method is cleaner.
+// ولكن بما أن عدد السجلات المعادة غير مهم في هذه الحالة
+//  يكون أفضل وأرتب exists() استخدام الطريقة
 if ( ! $model->where('status', 'pending')->exists() ) {
 }
 
-// But I find the ! in the statement above easily missed. The
-// doesntExist() method makes this statement even clearer.
+// ولكن قد تفوتك إشارة ! بسهولة أثناء قراءة الكود السابق
+// أفضل doesntExist() لذا استعمال الطريقة
 if ( $model->where('status', 'pending')->doesntExist() ) {
 }
 ```
 
-Tip given by [@ShawnHooper](https://twitter.com/ShawnHooper/status/1435686220542234626)
+تم تقديم هذه الحيلة بواسطة [ShawnHooper@](https://twitter.com/ShawnHooper/status/1435686220542234626)
 
-### Trait that you want to add to a few Models to call their boot() method automatically
-If you have a Trait that you want to add to a few Models to call their `boot()` method automatically, you can call Trait's method as boot[TraitName]
+
+<a name="trait-that-you-want-to-add-to-a-few-models-to-call-their-boot-method-automatically"></a>
+### سمات تود اضافتها للنماذج عند تشغيل الطريقة boot بشكل تلقائي
+
+اذا كان لديك سمة (Trait) تريد اضافتها للنماذج (Models) بحيث تقوم باستدعاء الطريقة `()boot` بشكل تلقائي يمكنك استدعاء السمة بالشكل التالي `boot[TraitName]`.
+
+
+
+في ملفات النماذج (models):
 ```php
 class Transaction extends  Model
 {
@@ -929,11 +944,13 @@ class Task extends  Model
 }
 ```
 
+في ملف السمة:
+
 ```php
 trait MultiTenantModelTrait
 {
-    // This method's name is boot[TraitName]
-    // It will be auto-called as boot() of Transaction/Task
+    // boot[TraitName] اسم الطريقة هو 
+    // Transaction/Task على النماذج  boot() سيتم استدعائها عند تشغيل الطريقة
     public static function bootMultiTenantModelTrait()
     {
         static::creating(function ($model) {
@@ -945,41 +962,54 @@ trait MultiTenantModelTrait
 }
 ```
 
-### There are two common ways of determining if a table is empty in Laravel
-There are two common ways of determining if a table is empty in Laravel. Calling `exists()` or `count()` directly on the model!<br>
-One returns a strict true/false boolean, the other returns an integer which you can use as a falsy in conditionals.
+
+<a name="there-are-two-common-ways-of-determining-if-a-table-is-empty-in-laravel"></a>
+### أسلوبان لمعرفة فيما اذا كان الجدول فارغ في قاعدة البيانات
+
+يوجد أسلوبان تقليديان لمعرفة فيما اذا كان الجدول فارغاً في قاعدة البيانات:
+
+* الأول باستدعاء الطريقة `()exists`.
+* الثاني باستدعاء الطريقة `()count`. 
+
+الأولى تعيد قيمة بوليانية (true/false) أما الثانية تعيد رقم صحيح يمكن اختباره. 
+
+
 ```php
 public function index()
 {
     if (\App\Models\User::exists()) {
-        // returns boolean true or false if the table has any saved rows
+        //  يعيد متحول بولياني فيما اذا احتوى الجدول على أي سجلات
     }
     
     if (\App\Models\User::count()) {
-        // returns the count of rows in the table
+        // يعيد عدد السجلات في الجدول
     }
 }
 ```
 
-Tip given by [@aschmelyun](https://twitter.com/aschmelyun/status/1440641525998764041)
+تم تقديم هذه الحيلة بواسطة [aschmelyun@](https://twitter.com/aschmelyun/status/1440641525998764041)
 
-### How to prevent “property of non-object” error
+
+<a name="how-to-prevent-property-of-non-object-error"></a>
+### كيفية منع الخطأ من نمط “property of non-object”
+
+
 ```php
-// BelongsTo Default Models
-// Let's say you have Post belonging to Author and then Blade code:
+// BelongsTo في حال علاقة 
+// فيكون الكود كالآتي Author تعود ملكيته لنموذج من نوع Post بفرض أن النموذج
 $post->author->name;
 
-// Of course, you can prevent it like this:
+// يمكنك منع الخطأ بالأسلوب
 $post->author->name ?? ''
-// or
+// أو بالأسلوب
 @$post->author->name
 
-// But you can do it on Eloquent relationship level:
-// this relation will return an empty App\Author model if no author is attached to the post
+//  Eloquent لكن يمكنك منع الخطأ على مستوع علاقة
+// في هذه الحالة سيتم إعادة نموذج فارغ إن لم يحوي على نموذج
 public function author() {
     return $this->belongsTo('App\Author')->withDefault();
 }
-// or
+// أو بالشكل الآتي
 public function author() {
     return $this->belongsTo('App\Author')->withDefault([
         'name' => 'Guest Author'
@@ -987,10 +1017,14 @@ public function author() {
 }
 ```
 
-Tip given by [@coderahuljat](https://twitter.com/coderahuljat/status/1440556610837876741)
+تم تقديم هذه الحيلة بواسطة [coderahuljat@](https://twitter.com/coderahuljat/status/1440556610837876741)
 
-### Get original attributes after mutating an Eloquent record
-Get original attributes after mutating an Eloquent record you can get the original attributes by calling getOriginal()
+
+<a name="get-original-attributes-after-mutating-an-eloquent-record"></a>
+### الحصول على القيم الأصلية للسجل بعد تعديله
+
+يمكنك الحصول على القيم الأصلية للسجل بعد تعديله باستخدمام الطريقة ()getOriginal.
+
 ```php
 $user = App\User::first();
 $user->name; // John
@@ -999,19 +1033,27 @@ $user->getOriginal('name'); // John
 $user->getOriginal(); // Original $user record
 ```
 
-Tip given by [@devThaer](https://twitter.com/devThaer/status/1442133797223403521)
+تم تقديم هذه الحيلة بواسطة [devThaer@](https://twitter.com/devThaer/status/1442133797223403521)
 
-### A simple way to seed a database
-A simple way to seed a database in Laravel with a .sql dump file
+
+<a name="a-simple-way-to-seed-a-database"></a>
+### أسلوب بسيط لملئ (seeding) قاعدة البيانات
+
+يمكنك ملئ (seed) قاعدة البيانات ببساطة باستخدام ملف `sql dumb.` بالأسلوب التالي:
+
 ```php
 DB::unprepared(
     file_get_contents(__DIR__ . './dump.sql')
 );
 ```
-Tip given by [@w3Nicolas](https://twitter.com/w3Nicolas/status/1447902369388249091)
+تم تقديم هذه الحيلة بواسطة [w3Nicolas@](https://twitter.com/w3Nicolas/status/1447902369388249091)
 
-### The crossJoinSub method of the query constructor
-Using the CROSS JOIN subquery
+
+<a name="the-crossJoinSub-method-of-the-query-constructor"></a>
+### استعمال لطريقة crossJoinSub الخاصة بباني الاستعلامات
+لاستخدام استعلام الجزئي بواسطة انضمام عبر التقاطع:
+
+
 ```php
 use Illuminate\Support\Facades\DB;
 
@@ -1024,26 +1066,16 @@ DB::table('orders')
     ->get();
 ```
 
-Tip given by [@PascalBaljet](https://twitter.com/pascalbaljet)
+تم تقديم هذه الحيلة بواسطة [PascalBaljet@](https://twitter.com/pascalbaljet)
 
-### Belongs to Many Pivot table naming
 
-To determine the table name of the relationship's intermediate table, Eloquent will join the two related model names in alphabetical order. 
+<a name="belongs-to-many-pivot-table-naming"></a>
+### تسمية الجداول الخاصة بعلاقة Belongs to Many
 
-This would mean a join between `Post` and `Tag` could be added like this:
+لتحديد اسم الجدول الخاص بعلاقة بين جدولين، يتم دمج أسماء الجدولين بعد ترتيبهما بشكل أبجدي.
 
-```php
-class Post extends Model
-{
-    public $table = 'posts';
+فمثلاً الجدول الذي يربط النموذجين `Post` و `Tag`  يمكنه اضافته بالشكل التالي:
 
-    public function tags()
-    {
-        return $this->belongsToMany(Tag::class);
-    }
-}
-```
-However, you are free to override this convention, and you would need to specify the join table in the second argument.
 
 ```php
 class Post extends Model
@@ -1052,11 +1084,27 @@ class Post extends Model
 
     public function tags()
     {
-        return $this->belongsToMany(Tag::class, 'posts_tags');
+        return $this->belongsToMany(Tag::class); // posts_tags اسم الجدول الذي يربط النموذجين هو
     }
 }
 ```
-If you wish to be explicit about the primary keys you can also supply these as third and fourth arguments.
+
+بالطبع يمكنك تجاوز هذه الطريقة وتسمية الجدول بما يناسبك عن طريق تمرير اسم الجدول كوسيط ثانٍ للعلاقة:
+
+```php
+class Post extends Model
+{
+    public $table = 'posts';
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'posts_tags'); 
+    }
+}
+```
+
+في حال كنت تود أيضاً التصريح عن أسماء المفاتيح الأساسية لكل جدول عليك تمريرها كوسيطين ثالث ورابع:
+
 ```php
 class Post extends Model
 {
@@ -1068,16 +1116,22 @@ class Post extends Model
     }
 }
 ```
-Tip given by [@iammikek](https://twitter.com/iammikek)
+تم تقديم هذه الحيلة بواسطة [iammikek@](https://twitter.com/iammikek)
 
-### Order by Pivot Fields
-`BelongsToMany::orderByPivot()` allows you to directly sort the results of a BelongsToMany relationship query.
+
+<a name="order-by-pivot-fields"></a>
+### الترتيب حسب الحقول المحورية Pivot Fields
+تمكنك الطريقة `()BelongsToMany::orderByPivot` من ترتيب النتيجة بشكل مباشر بحسب الحقول المحورية (Pivot Fields).
+
+
 ```php
+//  Tag في ملف النموذج
 class Tag extends Model
 {
     public $table = 'tags';
 }
 
+// Post في ملف النموذج
 class Post extends Model
 {
     public $table = 'posts';
@@ -1091,19 +1145,21 @@ class Post extends Model
     }
 }
 
+// PostTagPivot في ملف النموذج
 class PostTagPivot extends Pivot
 {
     protected $table = 'post_tag';
 }
 
-// Somewhere in the Controller
+// في ملف المتحكم
 public function getPostTags($id)
 {
     return Post::findOrFail($id)->tags()->orderByPivot('flag', 'desc')->get();
 }
 ```
 
-Tip given by [@PascalBaljet](https://twitter.com/pascalbaljet)
+تم تقديم هذه الحيلة بواسطة [PascalBaljet@](https://twitter.com/pascalbaljet)
+
 
 ### Find a single record from a database
 The `sole()` method will return only one record that matches the criteria. If no such entry is found, then a `NoRecordsFoundException` will be thrown. If multiple records are found, then a `MultipleRecordsFoundException` will be thrown.
