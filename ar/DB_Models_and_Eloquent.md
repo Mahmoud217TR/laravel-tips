@@ -91,6 +91,8 @@
 - [Chain conditional clauses to the query without writing if-else statements](#chain-conditional-clauses-to-the-query-without-writing-if-else-statements)
 
 
+---
+
 <a name="reuse-or-clone-query"></a>
 ## إعادة استخدام أو نسخ استعلام
 
@@ -126,6 +128,8 @@ $inactive_products = $query->clone()->where('status', 0)->get(); // $query با�
 ```
 
 
+---
+
 <a name="eloquent-where-date-methods"></a>
 ## طرق استعلامات Eloquent الخاصة بالتاريخ
 
@@ -141,6 +145,8 @@ $products = Product::whereYear('created_at', date('Y'))->get();
 $products = Product::whereTime('created_at', '=', '14:13:58')->get();
 ```
 
+
+---
 
 <a name="increments-and-decrements"></a>
 ## التزايد والتناقص
@@ -158,6 +164,8 @@ Post::find($post_id)->decrement('view_count')
 ```
 
 
+---
+
 <a name="no-timestamp-columns"></a>
 ## إزالة الحقول الزمنية
 
@@ -172,6 +180,8 @@ class Company extends Model
 ```
 
 
+---
+
 <a name="soft-deletes-multiple-restore"></a>
 ## استعادة عدة سجلات من الحذف المؤقت
 
@@ -182,6 +192,8 @@ class Company extends Model
 Post::onlyTrashed()->where('author_id', 1)->restore();
 ```
 
+
+---
 
 <a name="model-all-columns"></a>
 ## تحديد مجموعة أعمدة مع الطريقة all
@@ -194,6 +206,8 @@ $users = User::all(['id', 'name', 'email']);
 ```
 
 
+---
+
 <a name="to-fail-or-not-to-fail"></a>
 ## العثور على نتيجة أو 404
 
@@ -205,6 +219,8 @@ $user = User::where('email', 'povilas@laraveldaily.com')->firstOrFail();
 ```
 
 
+---
+
 <a name="column-name-change"></a>
 ## تغيير اسم العامود
 
@@ -215,6 +231,8 @@ $user = User::where('email', 'povilas@laraveldaily.com')->firstOrFail();
 $users = DB::table('users')->select('name', 'email as user_email')->get();
 ```
 
+
+---
 
 <a name="map-query-results"></a>
 ## تعديل شكل نتائج الاستعلام
@@ -228,6 +246,8 @@ $users = User::where('role_id', 1)->get()->map(function (User $user) {
 });
 ```
 
+
+---
 
 <a name="change-default-timestamp-fields"></a>
 ## تغيير أسماء الحقول الزمنية
@@ -243,6 +263,8 @@ class Role extends Model
 }
 ```
 
+
+---
 
 <a name="quick-order-by-created_at"></a>
 ##  ترتيب سريع حسب زمن الانشاء
@@ -270,6 +292,8 @@ $lastUpdatedUser = User::latest('updated_at')->first();
 ```
 
 
+---
+
 <a name="automatic-column-value-when-creating-records"></a>
 ## قيمة تلقائية للحقول عند الانشاء
 
@@ -292,6 +316,8 @@ class Country extends Model {
 ```
 
 
+---
+
 <a name="db-raw-query-calculations-run-faster"></a>
 ## الحسابات في الاستعلامات الخام تكون أسرع
 
@@ -306,6 +332,8 @@ User::where('active', 1)
     ->get();
 ```
 
+
+---
 
 <a name="more-than-one-scope"></a>
 ## أكثر من مجال (scope) واحد
@@ -329,6 +357,8 @@ $users = User::registeredWithinDays(30)->active()->get();
 ```
 
 
+---
+
 <a name="no-need-to-convert-carbon"></a>
 ## لا حاجة لتحويل الصيغ عند استعمال Carbon 
 
@@ -343,6 +373,8 @@ $todayUsers = User::whereDate('created_at', now())->get();
 ```
 
 
+---
+
 <a name="grouping-by-first-letter"></a>
 ## تجميع النتائج باستخدام أول حرف من الاسم
 
@@ -354,6 +386,8 @@ $users = User::all()->groupBy(function($item) {
 });
 ```
 
+
+---
 
 <a name="never-update-the-column"></a>
 ## منع تغيير قيمة العامود
@@ -375,6 +409,8 @@ class User extends Model
 }
 ```
 
+
+---
 
 <a name="find-many"></a>
 ## الحصول على عدة سجلات باستخدام Find
@@ -406,6 +442,8 @@ Product::whereIntegerInRaw('id', range(1, 50))->get();
 > تم تقديم الحيلة بواسطة [sachinkiranti@](https://raisachin.com.np)
 
 
+---
+
 <a name="find-many-and-return-specific-columns"></a>
 ## الحصول على أعمدة محددة باستخدام Find 
 
@@ -420,6 +458,8 @@ $users = User::find([1,2,3], ['first_name', 'email']);
 > تم تقديم الحيلة بواسطة [tahiriqbalnajam@](https://github.com/tahiriqbalnajam)
 
 
+---
+
 <a name="find-by-key"></a>
 ## البحث باستخدام المفتاح الأساسي
 
@@ -430,6 +470,8 @@ $users = User::find([1,2,3], ['first_name', 'email']);
 $users = User::whereKey([1,2,3])->get();
 ```
 
+
+---
 
 <a name="use-uuid-instead-of-auto-increment"></a>
 ## استخدم uuid بدلاً من الزيادة التلقائية
@@ -468,6 +510,8 @@ class User extends Model
 ```
 
 
+---
+
 <a name="sub-selects-in-laravel-way"></a>
 ## التحديد الجزئي (Sub-Selects) بأسلوب لارافيل
 
@@ -483,6 +527,8 @@ return Destination::addSelect(['last_flight' => Flight::select('name')
 ```
 
 
+---
+
 <a name="hide-some-columns"></a>
 ## إخفاء بعض الأعمدة
 
@@ -493,6 +539,8 @@ return Destination::addSelect(['last_flight' => Flight::select('name')
 $users = User::all()->makeHidden(['email_verified_at', 'deleted_at']);
 ```
 
+
+---
 
 <a name="exact-db-error"></a>
 ## التقاط أخطاء SQL
@@ -510,6 +558,8 @@ try {
 }
 ```
 
+
+---
 
 <a name="soft-deletes-with-query-builder"></a>
 ## الإزالة المؤقتة (Soft-Delete) باستخدام باني الاستعلامات
@@ -529,6 +579,8 @@ $users = DB::table('users')->get();
 ```
 
 
+---
+
 <a name="good-old-sql-query"></a>
 ## تنفيذ استعلامات SQL 
 
@@ -540,6 +592,8 @@ DB::statement('DROP TABLE users');
 DB::statement('ALTER TABLE projects AUTO_INCREMENT=123');
 ```
 
+
+---
 
 <a name="use-db-transactions"></a>
 ## استعمل DB Transactions
@@ -557,6 +611,8 @@ DB::transaction(function () {
 });
 ```
 
+
+---
 
 <a name="update-or-create"></a>
 ## التحديث أو الإنشاء 
@@ -587,6 +643,8 @@ $flight = Flight::updateOrCreate(
 ```
 
 
+---
+
 <a name="forget-cache-on-save"></a>
 ## ازالة المفتاح من الكاش عند الحفظ
 اذا كان لديك مفتاح في الكاش (cache)، وليكن `posts` على سبيل المثال، يقوم باعطاء مجموعة (collection) وكنت تريد ازالة هذا المفتاح عند أي تخزين أو تحديث جديد يمكنك استعمال التابع الستاتيكي `saved` على النموذج الخاص بك كما يلي: 
@@ -607,6 +665,8 @@ class Post extends Model
 ```
 > تم تقديم هذه الحيلة بواسطة [pratiksh404@](https://github.com/pratiksh404)
 
+
+---
 
 <a name="change-format-of-created_at-and-updated_at"></a>
 ## تغيير صيغة حقلي created_at و updated_at
@@ -635,6 +695,8 @@ public function getUpdatedAtFormattedAttribute()
 > تم تقديم هذه الحيلة بواسطة [syofyanzuhad@](https://github.com/syofyanzuhad)
 
 
+---
+
 <a name="storing-array-type-into-json"></a>
 ## تخزين المصفوفات بصيغة JSON 
 
@@ -653,6 +715,8 @@ protected $casts = [
 
 > تم تقديم هذه الحيلة بواسطة [pratiksh404@](https://github.com/pratiksh404)
 
+
+---
 
 <a name="make-a-copy-of-the-model"></a>
 ## استنساخ النموذج
@@ -679,6 +743,8 @@ $billing->save();
 ```
 
 
+---
+
 <a name="reduce-memory"></a>
 ## تخفيف الذاكرة
 
@@ -700,6 +766,8 @@ $orders = Order::toBase()->get();
 تذكر بأن هذا الأسلوب غالباً هو فكرة جيدة لتمرير مصفوفة من الحقول للطريقة get كي تمنع جلب كل الحقول من قاعدة البيانات.
 
 
+---
+
 <a name="force-query-without-fillableguarded"></a>
 ## التنفيذ القسري  للاستعلام مع تجاهل fillable و guarded
 
@@ -719,6 +787,8 @@ $team->forceFill(['name' => $request->name])
 ```
 بهذا الأسلوب سيتم تجاهل `fillable$` لهذا الاستعلام فقط وسيتم تنفيذه قسرياً. 
 
+
+---
 
 <a name="3-level-structure-of-parent-children"></a>
 ## بنى علائقية بثلاث مستويات
@@ -789,6 +859,8 @@ class Category extends Model
 ```
 
 
+---
+
 <a name="check-if-record-exists-or-show-404"></a>
 ## إظهار صفحة 404 عند اخفاق عملية البحث
 
@@ -810,6 +882,8 @@ $product->update($productDataArray);
 ```
 
 
+---
+
 <a name="perform-any-action-on-failure"></a>
 ## تنفيذ أوامر عند اخفاق عملية البحث
 
@@ -822,6 +896,8 @@ $model = Flight::where('legs', '>', 3)->firstOr(function () {
 })
 ```
 
+
+---
 
 <a name="abort-if-condition-failed"></a>
 ## الإنهاء في حال فشل الشرط
@@ -845,6 +921,8 @@ abort_if ($product->user_id != auth()->user()->id, 403)
 ```
 
 
+---
+
 <a name="perform-any-extra-steps-before-deleting-model"></a>
 ## انجاز خطوات إضافية قبل الحذف
 
@@ -864,6 +942,8 @@ public function delete(){
 
 > تم تقديم هذه الحيلة بواسطة [back2Lobby@](https://github.com/back2Lobby)
 
+
+---
 
 <a name="fill-a-column-automatically-while-you-persist-data-to-the-database"></a>
 ## ملئ عمود تلقائياً أثناء الادخال
@@ -890,6 +970,8 @@ class Article extends Model
 
 > تم تقديم هذه الحيلة بواسطة [sky_0xs@](https://twitter.com/sky_0xs/status/1432390722280427521)
 
+
+---
 
 <a name="extra-information-about-the-query"></a>
 ##  معلومات اضافية عن الاستعلام
@@ -927,6 +1009,8 @@ Illuminate\Support\Collection {#5344
 > تم تقديم هذه الحيلة بواسطة [amit_merchant@](https://twitter.com/amit_merchant/status/1432277631320223744)
 
 
+---
+
 <a name="using-the-doesntexist-method-in-laravel"></a>
 ## استخدام الطريقة ()doesntExist في لارافيل
 
@@ -948,6 +1032,8 @@ if ( $model->where('status', 'pending')->doesntExist() ) {
 
 > تم تقديم هذه الحيلة بواسطة [ShawnHooper@](https://twitter.com/ShawnHooper/status/1435686220542234626)
 
+
+---
 
 <a name="trait-that-you-want-to-add-to-a-few-models-to-call-their-boot-method-automatically"></a>
 ## سمات تود اضافتها للنماذج عند تشغيل الطريقة boot بشكل تلقائي
@@ -990,6 +1076,8 @@ trait MultiTenantModelTrait
 ```
 
 
+---
+
 <a name="there-are-two-common-ways-of-determining-if-a-table-is-empty-in-laravel"></a>
 ## أسلوبان لمعرفة فيما اذا كان الجدول فارغ في قاعدة البيانات
 
@@ -1016,6 +1104,8 @@ public function index()
 
 > تم تقديم هذه الحيلة بواسطة [aschmelyun@](https://twitter.com/aschmelyun/status/1440641525998764041)
 
+
+---
 
 <a name="how-to-prevent-property-of-non-object-error"></a>
 ## كيفية منع الخطأ من نمط “property of non-object”
@@ -1047,6 +1137,8 @@ public function author() {
 > تم تقديم هذه الحيلة بواسطة [coderahuljat@](https://twitter.com/coderahuljat/status/1440556610837876741)
 
 
+---
+
 <a name="get-original-attributes-after-mutating-an-eloquent-record"></a>
 ## الحصول على القيم الأصلية للسجل بعد تعديله
 
@@ -1063,6 +1155,8 @@ $user->getOriginal(); // Original $user record
 > تم تقديم هذه الحيلة بواسطة [devThaer@](https://twitter.com/devThaer/status/1442133797223403521)
 
 
+---
+
 <a name="a-simple-way-to-seed-a-database"></a>
 ## أسلوب بسيط لملئ (seeding) قاعدة البيانات
 
@@ -1075,6 +1169,8 @@ DB::unprepared(
 ```
 > تم تقديم هذه الحيلة بواسطة [w3Nicolas@](https://twitter.com/w3Nicolas/status/1447902369388249091)
 
+
+---
 
 <a name="the-crossJoinSub-method-of-the-query-constructor"></a>
 ## استعمال لطريقة crossJoinSub الخاصة بباني الاستعلامات
@@ -1095,6 +1191,8 @@ DB::table('orders')
 
 > تم تقديم هذه الحيلة بواسطة [PascalBaljet@](https://twitter.com/pascalbaljet)
 
+
+---
 
 <a name="belongs-to-many-pivot-table-naming"></a>
 ## تسمية الجداول الخاصة بعلاقة Belongs to Many
@@ -1145,6 +1243,8 @@ class Post extends Model
 ```
 > تم تقديم هذه الحيلة بواسطة [iammikek@](https://twitter.com/iammikek)
 
+
+---
 
 <a name="order-by-pivot-fields"></a>
 ## الترتيب حسب الحقول المحورية Pivot Fields
