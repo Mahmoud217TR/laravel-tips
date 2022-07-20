@@ -51,16 +51,16 @@
 - [استعمال لطريقة crossJoinSub الخاصة بباني الاستعلامات](#the-crossJoinSub-method-of-the-query-constructor)
 - [تسمية الجداول الخاصة بعلاقة Belongs to Many](#belongs-to-many-pivot-table-naming)
 - [الترتيب حسب الحقول المحورية Pivot Fields](#order-by-pivot-fields)
-- [Find a single record from a database](#find-a-single-record-from-a-database)
-- [Automatic records chunking](#automatic-records-chunking)
-- [Updating the model without dispatching events](#updating-the-model-without-dispatching-events)
-- [Periodic cleaning of models from obsolete records](#periodic-cleaning-of-models-from-obsolete-records)
-- [Immutable dates and casting to them](#immutable-dates-and-casting-to-them)
-- [The findOrFail method also accepts a list of ids](#the-findorfail-method-also-accepts-a-list-of-ids)
-- [Prunable trait to automatically remove models from your database](#prunable-trait-to-automatically-remove-models-from-your-database)
-- [withAggregate method](#withaggregate-method)
-- [Date convention](#date-convention)
-- [Eloquent multiple upserts](#eloquent-multiple-upserts)
+- [الحصول على سجل واحد من قاعدة البيانات](#find-a-single-record-from-a-database)
+- [التجزيئ التلقائي للسجلات](#automatic-records-chunking)
+- [تحديث النموذج بدون إطلاق أحداث](#updating-the-model-without-dispatching-events)
+- [التنظيف الدوري لقاعدة البيانات من السجلات القديمة جداً](#periodic-cleaning-of-models-from-obsolete-records)
+- [التواريخ الغير قابلة للتغير وكيفية القسر لها](#immutable-dates-and-casting-to-them)
+- [العثور على عدة سجلات باستخدام الطريقة findOrFail](#the-findorfail-method-also-accepts-a-list-of-ids)
+- [تقوم السمة Prunable بإزالة السجلات تلقائياً من قاعدة البيانات](#prunable-trait-to-automatically-remove-models-from-your-database)
+- [الطريقة withAggregate](#withaggregate-method)
+- [استعمال التاريخ والوقت بدلاً من الحقول البوليانية](#date-convention)
+- [عمليات تحديث/انشاء (upserts) متعددة باستخدام Eloquent](#eloquent-multiple-upserts)
 - [Retrieve the Query Builder after filtering the results](#retrieve-the-query-builder-after-filtering-the-results)
 - [Custom casts](#custom-casts)
 - [Order based on a related model's average or count](#order-based-on-a-related-models-average-or-count)
@@ -133,9 +133,9 @@ $inactive_products = $query->clone()->where('status', 0)->get(); // $query با�
 <a name="eloquent-where-date-methods"></a>
 ## طرق استعلامات Eloquent الخاصة بالتاريخ
 
-باستعلامات Eloquent، يمكنك الحصول على النتائج باستخدام طرق التاريخ التالية: 
+باستعلامات Eloquent، يمكنك الحصول على النتائج باستخدام طرق التاريخ التالية:
 
- `()whereDay()`, `whereMonth()`, `whereYear()`, `whereDate()`,  `whereTime`.
+`whereDay()`, `whereMonth()`, `whereYear()`, `whereDate()`,  `whereTime()`.
 
 ```php
 $products = Product::whereDate('created_at', '2018-01-31')->get();
@@ -1288,16 +1288,28 @@ public function getPostTags($id)
 > تم تقديم هذه الحيلة بواسطة [PascalBaljet@](https://twitter.com/pascalbaljet)
 
 
-### Find a single record from a database
-The `sole()` method will return only one record that matches the criteria. If no such entry is found, then a `NoRecordsFoundException` will be thrown. If multiple records are found, then a `MultipleRecordsFoundException` will be thrown.
+---
+
+<a name="find-a-single-record-from-a-database"></a>
+## الحصول على سجل واحد من قاعدة البيانات
+تقوم الطريقة `sole()` بإعادة سجل واحد فقط يطابق بيانات البحث. في حال لم يتم العثور على أي تطابق سيتم رمي استثناء من نوع `NoRecordsFoundException`. وفي حال تطابق عدة سجلات سيتم رمي استثناء من نوع `MultipleRecordsFoundException`. 
+
+
 ```php
 DB::table('products')->where('ref', '#123')->sole();
 ```
 
-Tip given by [@PascalBaljet](https://twitter.com/pascalbaljet)
+> تم تقديم هذه الحيلة بواسطة [PascalBaljet@](https://twitter.com/pascalbaljet)
 
-### Automatic records chunking
-Similar to `each()` method, but easier to use. Automatically splits the result into parts (chunks).
+
+---
+
+<a name="automatic-records-chunking"></a>
+## التجزيئ التلقائي للسجلات
+
+يمكنك فصل أجزاء (chunks) نتيجة الاستعلام بشكل تلقائي ومشابه لاستعمال الطريقة بالشكل `()each` الآتي: 
+
+
 ```php
 return User::orderBy('name')->chunkMap(fn ($user) => [
     'id' => $user->id,
@@ -1305,18 +1317,32 @@ return User::orderBy('name')->chunkMap(fn ($user) => [
 ]), 25);
 ```
 
-Tip given by [@PascalBaljet](https://twitter.com/pascalbaljet)
+> تم تقديم هذه الحيلة بواسطة [PascalBaljet@](https://twitter.com/pascalbaljet)
 
-### Updating the model without dispatching events
-Sometimes you need to update the model without sending any events. We can now do this with the `updateQuietly()` method, which under the hood uses the `saveQuietly()` method.
+
+---
+
+<a name="updating-the-model-without-dispatching-events"></a>
+## تحديث النموذج بدون إطلاق أحداث
+
+في بعض الأحيان قد تحتاج لعمل تحديث (update) نموذج بدون إطلاق أي أحداث (events). يمكن فعل ذلك باستخدام الطريقة `()updateQuietly` التي بدورها تستعمل الطريقة `()saveQuietly` ضمنياً. 
+
+
 ```php
 $flight->updateQuietly(['departed' => false]);
 ```
 
-Tip given by [@PascalBaljet](https://twitter.com/pascalbaljet)
+> تم تقديم هذه الحيلة بواسطة [PascalBaljet@](https://twitter.com/pascalbaljet)
 
-### Periodic cleaning of models from obsolete records
-To periodically clean models of obsolete records. With this trait, Laravel will do this automatically, only you need to adjust the frequency of the `model:prune` command in the Kernel class.
+
+---
+
+<a name="periodic-cleaning-of-models-from-obsolete-records"></a>
+## التنظيف الدوري لقاعدة البيانات من السجلات القديمة جداً
+
+لتنظيف النماذج من السجلات القديمة يمكنك استخدام السمة `Prunable`. تقوم لارافيل بشكل تلقائي بعملية التنظيف، لكن يتوجب عليك تعديل مدة التنظيف الخاصة بنماذجك بالأسلوب الآتي: 
+
+
 ```php
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Prunable;
@@ -1334,23 +1360,31 @@ class Flight extends Model
     }
 }
 ```
-Also, in the pruning method, you can set the actions that must be performed before deleting the model:
+
+كما يمكنك إضافة مجموعة تعليمات يتم تنفيذها قبل عملية الحذف عن طريق اضافتها للطريقة `pruning` الخاصة بالنموذج كما يلي:
+
 ```php
 protected function pruning()
 {
-    // Removing additional resources,
-    // associated with the model. For example, files.
+    //  إزالة مصادر إضافية مرتبطة بالسجل
+    // مثل ملفات على سبيل المثال
 
     Storage::disk('s3')->delete($this->filename);
 }
 ```
 
-Tip given by [@PascalBaljet](https://twitter.com/pascalbaljet)
+> تم تقديم هذه الحيلة بواسطة [PascalBaljet@](https://twitter.com/pascalbaljet)
 
-### Immutable dates and casting to them
-Laravel 8.53 introduces the `immutable_date` and `immutable_datetime` castes that convert dates to `Immutable`.
 
-Cast to CarbonImmutable instead of a regular Carbon instance.
+---
+
+<a name="immutable-dates-and-casting-to-them"></a>
+## التواريخ الغير قابلة للتغير وكيفية القسر لها
+
+تقدم نسخة 8.53 من لارافيل `immutable_date` و `immutable_datetime` لقسر التواريخ لنوع `Immutable`.
+
+كما يمكنك القسر لنوع `CarbonImmutable`  بدلاً من القسر لنوع `Carbon`.
+
 ```php
 class User extends Model
 {
@@ -1361,67 +1395,86 @@ class User extends Model
 }
 ```
 
-Tip given by [@PascalBaljet](https://twitter.com/pascalbaljet)
+> تم تقديم هذه الحيلة بواسطة [PascalBaljet@](https://twitter.com/pascalbaljet)
 
-### The findOrFail method also accepts a list of ids
-The findOrFail method also accepts a list of ids. If any of these ids are not found, then it "fails".<br>
-Nice if you need to retrieve a specific set of models and don't want to have to check that the count you got was the count you expected
+
+---
+
+<a name="the-findorfail-method-also-accepts-a-list-of-ids"></a>
+## العثور على عدة سجلات باستخدام الطريقة findOrFail
+
+يمكن للطريقة `findOrFail` العثور على عدة سجلات عبر تمرير مصفوفة كوسيط ثاني.
+إن لم يتم العثور على أحد السجلات فستقوم الطريقة بتنفيذ عملية `fail` في هذه الحالة.
+
+الطريقة جيدة في حال أردت الحصول على عدة سجلات بدون التحقق من عدد السجلات المعاد.
 
 ```php
 User::create(['id' => 1]);
 User::create(['id' => 2);
 User::create(['id' => 3]);
 
-// Retrives the user...
+// سيتم إعادة المستخدم الأول
 $user = User::findOrFail(1);
 
-// Throws a 404 because the user doesn't exist...
+// سيقوم برمي استثناء وإظهار صفحة 404 لم يتم العثور على العنصر
 User::findOrFail(99);
 
-// Retrives all 3 users...
+//  يعيد سجلات المستخدمين الثلاثة
 $users = User::findOrFail([1, 2, 3]);
 
-// Throws because it is unable to find *all* of the users
+// يقوم برمي استثناء لأنه فشل في استعدة السجل الغير موجود
 User::findOrFail([1, 2, 3, 99]);
 ```
 
-Tip given by [@timacdonald87](https://twitter.com/timacdonald87/status/1457499557684604930)
+> تم تقديم هذه الحيلة بواسطة [timacdonald87@](https://twitter.com/timacdonald87/status/1457499557684604930)
 
-### Prunable trait to automatically remove models from your database
-New in Laravel 8.50: You can use the Prunable trait to automatically remove models from your database. For example, you can permanently remove soft deleted models after a few days.
+
+---
+
+<a name="prunable-trait-to-automatically-remove-models-from-your-database"></a>
+## تقوم السمة Prunable بإزالة السجلات تلقائياً من قاعدة البيانات
+
+في الإصدار 8.50 من لارافيل يمكنك استخدام الخاصية `Prunable` لإزالة السجلات القديمة من قاعدة البيانات. يمكنك استخدام هذه السمة للتخلص من السجلات المحذوفة مؤقتاً (soft deleted) على سبيل المثال.
+
+
 
 ```php
 class File extends Model
 {
     use SoftDeletes;
     
-    // Add Prunable trait
+    // Prunable قم بإضافة الخاصية
     use Prunable;
     
     public function prunable()
     {
-        // Files matching this query will be pruned
+        // سيتم حذف السجلات المطابقة لعمليات البحث
         return static::query()->where('deleted_at', '<=', now()->subDays(14));
     }
     
     protected function pruning()
     {
-        // Remove the file from s3 before deleting the model
+        // سيتم حذف الملف قبل أن يتم حذف السجل
         Storage::disk('s3')->delete($this->filename);
     }
 }
 
-// Add PruneCommand to your schedule (app/Console/Kernel.php)
+//  (app/Console/Kernel.php) قم بإضافة أمر التشذيب لجدولك في ملف
 $schedule->command(PruneCommand::class)->daily();
 ```
 
-Tip by [@Philo01](https://twitter.com/Philo01/status/1457626443782008834)
+> تم تقديم هذه الحيلة بواسطة [Philo01@](https://twitter.com/Philo01/status/1457626443782008834)
 
-### withAggregate method
-Under the hood, the withAvg/withCount/withSum and other methods in Eloquent use the 'withAggregate' method. You can use this method to add a subselect based on a relationship
+
+---
+
+<a name="withaggregate-method"></a>
+## الطريقة withAggregate
+
+تقوم كل من الطرق `withAvg` ,`withCount` ,`withSum` ,`withSum` ,و غيرها من الطرق باستعمال الطريقة `withAggregate` ضمنياً. كما يمكنك استعمالها لإضافة استعلام جزئي (subselect) بنائاً على علاقة ما. 
 
 ```php
-// Eloquent Model
+// في ملف النموذج
 class Post extends Model
 {
     public function user()
@@ -1430,48 +1483,61 @@ class Post extends Model
     }
 }
 
-// Instead of eager loading all users...
+// لكل المستخدمين  (eager loading) بدلاً من التحميل الاستباقي
 $posts = Post::with('user')->get();
 
-// You can add a subselect to only retrieve the user's name...
+// يمكنك اضافة استعلام جزئي لجلب اسماء المستخدمين
 $posts = Post::withAggregate('user', 'name')->get();
 
-// This will add a 'user_name' attribute to the Post instance:
+// سيتم اضافة اسماء المستخدمين لنتيجة الاستعلام
 $posts->first()->user_name;
 ```
 
-Tip given by [@pascalbaljet](https://twitter.com/pascalbaljet/status/1457702666352594947)
+> تم تقديم هذه الحيلة بواسطة [pascalbaljet@](https://twitter.com/pascalbaljet/status/1457702666352594947)
 
-### Date convention
-Using the `something_at` convention instead of just a boolean in Laravel models gives you visibility into when a flag was changed – like when a product went live.
+
+---
+
+<a name="date-convention"></a>
+## استعمال التاريخ والوقت بدلاً من الحقول البوليانية
+
+استخدام حقل `something_at` كتاريخ ووقت بدلاً من متحول بولياني في قاعدة البيانات يعطيك معرفة لمتى تم تغيير قمية المتحول، فعلى سبيل المثال يمكنك معرفة متى تم عرض منتج ما للبيع: 
+
 
 ```php
-// Migration
+// Migration في ملف 
 Schema::table('products', function (Blueprint $table) {
     $table->datetime('live_at')->nullable();
 });
 
-// In your model
+// في ملف النموذج
 public function live()
 {
     return !is_null($this->live_at);
 }
 
-// Also in your model
 protected $dates = [
     'live_at'
 ];
 ```
 
-Tip given by [@alexjgarrett](https://twitter.com/alexjgarrett/status/1459174062132019212)
+> تم تقديم هذه الحيلة بواسطة [alexjgarrett@](https://twitter.com/alexjgarrett/status/1459174062132019212)
 
-### Eloquent multiple upserts
-The upsert() method will insert or update multiple records.
 
-- First array: the values to insert or update
-- Second: unique identifier columns used in the select statement
-- Third: columns that you want to update if the record exists
+---
 
+<a name="eloquent-multiple-upserts"></a>
+## عمليات تحديث/انشاء (upserts) متعددة باستخدام Eloquent
+
+تقوم الطريقة `()upsert` بتعديل سجل في حال وجوده، أو انشائه في حال عدم وجوده.
+كما يمكن استخدام الطريقة مع عدة سجلات.
+
+الوسطاء الخاصة بالطريقة `()upsert` :
+
+- أولاً: مصفوفة القيم الخاصة بالسجلات التي يجب تعديلها أو ادخالها.
+- ثانياً: أعمدة فريدة (unique) تستخدم في عملية التحديد.
+- ثالثاً: الأعمدة التي يجب تحديثها في حال وجد السجل.
+- 
 ```php
 Flight::upsert([
     ['departure' => 'Oakland', 'destination' => 'San Diego', 'price' => 99],
@@ -1479,7 +1545,8 @@ Flight::upsert([
 ], ['departure', 'destination'], ['price']);
 ```
 
-Tip given by [@mmartin_joo](https://twitter.com/mmartin_joo/status/1461591319516647426)
+> تم تقديم هذه الحيلة بواسطة [mmartin_joo@](https://twitter.com/mmartin_joo/status/1461591319516647426)
+
 
 ### Retrieve the Query Builder after filtering the results
 To retrieve the Query Builder after filtering the results: you can use `->toQuery()`.<br>
