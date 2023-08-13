@@ -1,20 +1,30 @@
-## API
+## واجهة برمجة التطبيقات (API)
 
-⬆️ [Go to main menu](README.md#laravel-tips) ⬅️ [Previous (Log and debug)](log-and-debug.md) ➡️ [Next (Other)](other.md)
+⬆️ [العودة إلى القائمة الرئيسية](README.md#laravel-tips) ➡️ [السابق (السجل والتصحيح)](log-and-debug.md) ⬅️ [التالي (أخرى)](other.md)
 
-- [API Resources: With or Without "data"?](#api-resources-with-or-without-data)
-- [Conditional Relationship Counts on API Resources](#conditional-relationship-counts-on-api-resources)
-- [API Return "Everything went ok"](#api-return-everything-went-ok)
-- [Avoid N+1 queries in API resources](#avoid-n1-queries-in-api-resources)
-- [Get Bearer Token from Authorization header](#get-bearer-token-from-authorization-header)
-- [Sorting Your API Results](#sorting-your-api-results)
-- [Customize Exception Handler For API](#customize-exception-handler-for-api)
-- [Force JSON Response For API Requests](#force-json-response-for-api-requests)
-- [API Versioning](#api-versioning)
+- [مصادر واجهة التطبيقات (API Resources) مع أو بدون "بيانات"؟ ](#api-resources-with-or-without-data)
+- [العد الشرطي للعلاقات في مصادر واجهة برمجة التطبيقات (API Resources)](#conditional-relationship-counts-on-api-resources)
+- [إعادة رد "Everything went ok"](#api-return-everything-went-ok)
+- [تجنب مشكلة N+1 في استعلامات مصادر واجهة التطبيقات (API Resources)](#avoid-n1-queries-in-api-resources)
+- [الحصول على Bearer Token من ترويسة التفويض (Authorization Header)](#get-bearer-token-from-authorization-header)
+- [ترتيب نتائج واجهة التطبيقات (API)](#sorting-your-api-results)
+- [تخصيص معالج الاستثناءات (Exception Handler) لواجهة برمجة التطبيقات (API Resources)](#customize-exception-handler-for-api)
+- [إجبار الرد بتنسيق JSON لطلبات واجهة برمجة التطبيقات(API Requests)](#force-json-response-for-api-requests)
+- [إصدارات واجهة برمجة التطبيقات (API Versioning).](#api-versioning)
 
-### API Resources: With or Without "data"?
+---
+<h3 id="api-resources-with-or-without-data">
+مصادر واجهة التطبيقات (API Resources) مع أو بدون "بيانات"؟
+</h3>
 
-If you use Eloquent API Resources to return data, they will be automatically wrapped in 'data'. If you want to remove it, add `JsonResource::withoutWrapping();` in `app/Providers/AppServiceProvider.php`.
+إذا كنت تستخدم مصادر واجهة برمجة التطبيقات (API Resources) لاسترجاع البيانات، فسيتم تغليفها تلقائيًا بالمعلومات. إذا كنت ترغب في إزالتها، قم بإضافة التعليمة التالية:
+
+`JsonResource::withoutWrapping();`
+
+في الملف:
+
+`app/Providers/AppServiceProvider.php`.
+
 
 ```php
 class AppServiceProvider extends ServiceProvider
@@ -26,11 +36,14 @@ class AppServiceProvider extends ServiceProvider
 }
 ```
 
-Tip given by [@phillipmwaniki](https://twitter.com/phillipmwaniki/status/1445230637544321029)
+النصيحة مقدمة من [@phillipmwaniki](https://twitter.com/phillipmwaniki/status/1445230637544321029)
 
-### Conditional Relationship Counts on API Resources
+---
+<h3 id="conditional-relationship-counts-on-api-resources">
+العد الشرطي للعلاقات في مصادر واجهة برمجة التطبيقات (API Resources)
+</h3>
 
-You may conditionally include the count of a relationship in your resource response by using the whenCounted method. By doing so, the attribute is not included if the relationships' count is missing.
+يمكنك تضمين العد للعلاقة في الرد الخاص بالمصدر (Resources) بشكل شرطي باستخدام طريقة whenCounted. من خلال القيام بذلك، لن يتم تضمين السمة إذا كانت علاقة حساب العدد العلاقات غير مفقودة.
 
 ```php
 public function toArray($request)
@@ -46,12 +59,17 @@ public function toArray($request)
 }
 ```
 
-Tip given by [@mvpopuk](https://twitter.com/mvpopuk/status/1570480977507504128)
+النصيحة مقدمة من [@mvpopuk](https://twitter.com/mvpopuk/status/1570480977507504128)
 
-### API Return "Everything went ok"
+---
+<h3 id="api-return-everything-went-ok">
+إعادة رد "Everything went ok"
+</h3>
 
-If you have API endpoint which performs some operations but has no response, so you wanna return just "everything went ok", you may return 204 status code "No
-content". In Laravel, it's easy: `return response()->noContent();`.
+
+إذا كان لديك نقطة نهاية API تقوم ببعض العمليات لكنها ليست لديها استجابة، وتريد فقط إرجاع "Everything went ok"، فيمكنك إرجاع رمز الحالة 204 "بدون محتوى". في لارافيل، يمكنك القيام بذلك بسهولة عن طريق:
+
+`return response()->noContent();`
 
 ```php
 public function reorder(Request $request)
@@ -64,14 +82,22 @@ public function reorder(Request $request)
 }
 ```
 
-### Avoid N+1 queries in API resources
+---
+<h3 id="avoid-n1-queries-in-api-resources">
+تجنب مشكلة N+1 في استعلامات مصادر واجهة التطبيقات (API Resources)
+</h3>
 
-You can avoid N+1 queries in API resources by using the `whenLoaded()` method.
+يمكنك تجنب مشكلة N+1 في استعلامات مصادر واجهة التطبيقات عن طريق استعمال الطريقة:
 
-This will only append the department if it’s already loaded in the Employee model.
+`whenLoaded()`
 
-Without `whenLoaded()` there is always a query for the department
+سيتم إضافة القسم فقط إذا تم تحميله بالفعل في نموذج الموظف.
 
+بدون الطريقة 
+
+`whenLoaded()`
+
+سيكون هناك دائمًا استعلام للقسم.
 ```php
 class EmployeeResource extends JsonResource
 {
@@ -88,11 +114,19 @@ class EmployeeResource extends JsonResource
 }
 ```
 
-Tip given by [@mmartin_joo](https://twitter.com/mmartin_joo/status/1473987501501071362)
+النصيحة مقدمة من [@mmartin_joo](https://twitter.com/mmartin_joo/status/1473987501501071362)
 
-### Get Bearer Token from Authorization header
 
-The `bearerToken()` function is very handy when you are working with apis & want to access the token from Authorization header.
+---
+<h3 id="get-bearer-token-from-authorization-header">
+الحصول على Bearer Token من ترويسة التفويض (Authorization Header)
+</h3>
+
+إن الدالة:
+
+`bearerToken()`
+
+مفيدة عند العمل على واجهات التطبيقات وترغب في الوصول إلى رمز الـBearer Token من رأس التفويض (Authorization header).
 
 ```php
 // Don't parse API headers manually like this:
@@ -103,11 +137,15 @@ $token = substr($tokenWithBearer, 7);
 $token = $request->bearerToken();
 ```
 
-Tip given by [@iamharis010](https://twitter.com/iamharis010/status/1488413755826327553)
+النصيحة مقدمة من [@iamharis010](https://twitter.com/iamharis010/status/1488413755826327553)
 
-### Sorting Your API Results
+---
+<h3 id="sorting-your-api-results">
+ترتيب نتائج واجهة التطبيقات (API)
+</h3>
 
-Single-column API sorting, with direction control
+
+فرز واجهة برمجة التطبيقات (API) بعمود واحد، مع التحكم في الاتجاه.
 
 ```php
 // Handles /dogs?sort=name and /dogs?sort=-name
@@ -125,7 +163,9 @@ Route::get('dogs', function (Request $request) {
 });
 ```
 
-we do the same for multiple columns (e.g., ?sort=name,-weight)
+نفعل نفس الأمر لعدة أعمدة، على سبيل المقال:
+
+(?sort=name,-weight)
 
 ```php
 // Handles ?sort=name,-weight
@@ -150,12 +190,19 @@ Route::get('dogs', function (Request $request) {
 ```
 
 ---
+<h3 id="customize-exception-handler-for-api">
+تخصيص معالج الاستثناءات (Exception Handler) لواجهة برمجة التطبيقات (API Resources)
+</h3>
 
-### Customize Exception Handler For API
+#### لاصدار لارافيل 8 والإصدارات الأقدم:
 
-#### Laravel 8 and below:
+توجد الطريقة
 
-There's a method `render()` in `App\Exceptions` class:
+ `render()`
+
+ في الصف
+ 
+ `App\Exceptions`
 
 ```php
    public function render($request, Exception $exception)
@@ -181,10 +228,17 @@ There's a method `render()` in `App\Exceptions` class:
         return parent::render($request, $exception);
     }
 ```
+---
 
-#### Laravel 9 and above:
+#### في الاصادرا 9 من لارافيل والاصدارات الأحدث:
 
-There's a method `register()` in `App\Exceptions` class:
+توجد الدالة
+
+`register()`
+
+في الصف
+
+`App\Exceptions`
 
 ```php
     public function register()
@@ -213,21 +267,23 @@ There's a method `register()` in `App\Exceptions` class:
     }
 ```
 
-Tip given by [Feras Elsharif](https://github.com/ferasbbm)
+النصيحة مقدمة من [Feras Elsharif](https://github.com/ferasbbm)
 
 ---
+<h3 id="force-json-response-for-api-requests">
+إجبار الرد بتنسيق JSON لطلبات واجهة برمجة التطبيقات(API Requests)
+</h3>
 
-### Force JSON Response For API Requests
 
-If you have built an API and it encounters an error when the request does not contain "Accept: application/JSON " HTTP Header then the error will be returned as HTML or redirect response on API routes, so for avoid it we can force all API responses to JSON.
+إذا قمت ببناء واجهة برمجة تطبيقات (API) وواجهت خطأ عندما لا تحتوي الطلبات على الترويسة `Accept: application/JSON`، سيتم رد الخطأ بتنسيق HTML أو تحويل على مسارات واجهة البرمجة، لذا يمكننا تجنب ذلك من خلال إجبار جميع استجابات واجهة البرمجة لتكون بتنسيق JSON.
 
-The first step is creating middleware by running this command:
+الخطوة الأولى انشاء برمجية وسيطة (Middleware) بالأمر التالي:
 
 ```console
 php artisan make:middleware ForceJsonResponse
 ```
 
-Write this code on the handle function in `App/Http/Middleware/ForceJsonResponse.php` file:
+قم بكتابة الكود التالي في دالة Handle في ملف `App/Http/Middleware/ForceJsonResponse.php`
 
 ```php
 public function handle($request, Closure $next)
@@ -237,8 +293,7 @@ public function handle($request, Closure $next)
 }
 ```
 
-Second, register the created middleware in app/Http/Kernel.php file:
-
+ثانياً، قم بتسجيل البرمجية الوسيطة (Middleware) في الملف `app/Http/Kernel.php`
 ```php
 protected $middlewareGroups = [
     'api' => [
@@ -247,23 +302,26 @@ protected $middlewareGroups = [
 ];
 ```
 
-Tip given by [Feras Elsharif](https://github.com/ferasbbm)
+النصيحة مقدمة من [Feras Elsharif](https://github.com/ferasbbm)
 
 ---
+<h3 id="api-versioning">
+إصدارات واجهة برمجة التطبيقات (API Versioning).
+</h3>
 
-### API Versioning
+#### متى يجب إصدار النسخة؟
 
-#### When to version?
+عند العمل على مشروع قد يكون لديه إصدارات متعددة في المستقبل أو تحتوي نقاط النهاية (Endpoints) على تغيير مؤثر مثل تغيير في تنسيق بيانات الرد، وترغب في ضمان إبقاء الإصدارات السابقة لواجهة البرمجة التطبيقية تعمل عند إجراء تغييرات على الكود.
 
-If you are working on a project that may have multi-release in the future or your endpoints have a breaking change like a change in the format of the response data, and you want to ensure that the API version remains functional when changes are made to the code.
+#### تغيير ملفات المسار الافتراضي
 
-#### Change The Default Route Files
 
-The first step is to change the route map in the `App\Providers\RouteServiceProvider` file, so let's get started:
+الخطوة الأولى هي تغيير خريطة المسار في الملف `App\Providers\RouteServiceProvider`، لنبدأ:
 
-#### Laravel 8 and above:
 
-Add a 'ApiNamespace' property
+#### للإصدار الثامن من لارافيل والإصدارات الأحدث:
+
+قم بإضافة الخاصية `ApiNamespace`
 
 ```php
 /**
@@ -273,7 +331,7 @@ Add a 'ApiNamespace' property
 protected string $ApiNamespace = 'App\Http\Controllers\Api';
 ```
 
-Inside the method boot, add the following code:
+ضمن الدالة `boot` قم بإضافة الكود التالي:
 
 ```php
 $this->routes(function () {
@@ -291,9 +349,9 @@ $this->routes(function () {
 });
 ```
 
-#### Laravel 7 and below:
+#### لإصدار لارافيل 7 والإصدارات الأقدم:
 
-Add a 'ApiNamespace' property
+قم بإضافة الخاصية `ApiNamespace`
 
 ```php
 /**
@@ -303,7 +361,7 @@ Add a 'ApiNamespace' property
 protected string $ApiNamespace = 'App\Http\Controllers\Api';
 ```
 
-Inside the method map, add the following code:
+ضمن الدالة `map` قم بإضافة الكود التالي:
 
 ```php
 // remove this $this->mapApiRoutes();
@@ -311,7 +369,7 @@ Inside the method map, add the following code:
     $this->mapApiV2Routes();
 ```
 
-And add these methods:
+قم بإضافة الدوال التالية:
 
 ```php
   protected function mapApiV1Routes()
@@ -331,7 +389,7 @@ And add these methods:
     }
 ```
 
-#### Controller Folder Versioning
+#### تنسيق الإصدار في مجلد التحكم (Controller Folder Versioning)
 
 ```
 Controllers
@@ -342,7 +400,7 @@ Controllers
         └──AuthController.php
 ```
 
-#### Route File Versioning
+#### تنسيق ملف المسارات (Route File Versioning).
 
 ```
 routes
@@ -352,4 +410,4 @@ routes
    └── web.php
 ```
 
-Tip given by [Feras Elsharif](https://github.com/ferasbbm)
+النصيحة مقدمة من [Feras Elsharif](https://github.com/ferasbbm)
