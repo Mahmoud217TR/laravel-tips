@@ -25,7 +25,7 @@
 - [النسخة الأصلية ](https://github.com/LaravelDaily/laravel-tips)
 - [النسخة الصينية](https://github.com/Lysice/laravel-tips-chinese/blob/master/README-zh.md)
 - [النسخة الإسبانية](https://github.com/ErickMUOSD/laravel-tips-spanish)
-- [نصائح لارافيل في موجه الأوامر(Terminal)](https://github.com/godruoyi/laravel-tips)
+- [نصائح لارافيل في موجه الأوامر (Terminal)](https://github.com/godruoyi/laravel-tips)
 - [نصائح لارافيل في Raycast](https://github.com/godruoyi/laravel-tips-raycast)
 ---
 **تحديث 24 نسيان 2023**: حاليًا يوجد **354 نصيحة** مقسمة إلى 14 قسمًا.**
