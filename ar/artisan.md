@@ -1,20 +1,26 @@
-## Artisan
+## أوامر Artisan
 
-⬆️ [Go to main menu](README.md#laravel-tips) ⬅️ [Previous (Mail)](mail.md) ➡️ [Next (Factories)](factories.md)
+⬆️ [العودة إلى القائمة الرئيسية](README.md#laravel-tips) ➡️ [السابق (البريد)](mail.md) ⬅️ [التالي (المصانع)](factories.md)
 
-- [Artisan command parameters](#artisan-command-parameters)
-- [Execute a Closure after command runs without errors or has any errors](#execute-a-closure-after-command-runs-without-errors-or-has-any-errors)
-- [Run artisan commands on specific environments](#run-artisan-commands-on-specific-environments)
-- [Maintenance Mode](#maintenance-mode)
-- [Artisan command help](#artisan-command-help)
-- [Exact Laravel version](#exact-laravel-version)
-- [Launch Artisan command from anywhere](#launch-artisan-command-from-anywhere)
-- [Hide your custom command](#hide-your-custom-command)
-- [Skip method](#skip-method)
+- [مدخلات أوامر Artisan](#artisan-command-parameters)
+- [تنفيذ تعبير (Closure) بعد تشغيل الأمر بدون أخطاء أو إذا كانت هناك أخطاء](#execute-a-closure-after-command-runs-without-errors-or-has-any-errors)
+- [تنفيذ أوامر Artisan في بيئة محددة](#run-artisan-commands-on-specific-environments)
+- [وضع الصيانة](#maintenance-mode)
+- [المساعدة بأوامر Artisan](#artisan-command-help)
+- [نسخة لارافيل بدقة](#exact-laravel-version)
+- [شغل أوامر Artisan من أي مكان](#launch-artisan-command-from-anywhere)
+- [اخفاء الأوامر المخصصة](#hide-your-custom-command)
+- [الدالة Skip](#skip-method)
 
-### Artisan command parameters
+<h3 id="artisan-command-parameters">
+مدخلات أوامر Artisan
+</h3>
 
-When creating Artisan command, you can ask the input in variety of ways: `$this->confirm()`, `$this->anticipate()`, `$this->choice()`.
+عند انشاء أوامر Artisan، يمكنك طلب الدخل بطرق متعددة:
+
+`$this->confirm()`
+`$this->anticipate()`
+`$this->choice()`
 
 ```php
 // Yes or no?
@@ -29,9 +35,11 @@ $name = $this->anticipate('What is your name?', ['Taylor', 'Dayle']);
 $name = $this->choice('What is your name?', ['Taylor', 'Dayle'], $defaultIndex);
 ```
 
-### Execute a Closure after command runs without errors or has any errors
+<h3 id="execute-a-closure-after-command-runs-without-errors-or-has-any-errors">
+تنفيذ تعبير (Closure) بعد تشغيل الأمر بدون أخطاء أو إذا كانت هناك أخطاء
+</h3>
 
-With Laravel scheduler you can execute a Closure when a command runs without errors with the onSuccess() method and also when a command has any errors with the onFailure() method.
+باستخدام مجدول لارافيل (Laravel scheduler) يمكنك تنفيذ تعبير (Closure) عند تنفيذ أمر Artisan بدون أخطاء باستخدام الدالة `onSuccess` وأيضاً عند حدوث مشكلة باستخدام الدالة `onFailure`.
 
 ```php
 protected function schedule(Schedule $schedule)
@@ -43,11 +51,13 @@ protected function schedule(Schedule $schedule)
 }
 ```
 
-Tip given by [@wendell_adriel](https://twitter.com/wendell_adriel)
+النصيحة مقدمة من [@wendell_adriel](https://twitter.com/wendell_adriel)
 
-### Run artisan commands on specific environments
+<h3 id="run-artisan-commands-on-specific-environments">
+تنفيذ أوامر Artisan في بيئة محددة
+</h3>
 
-Take control of your Laravel scheduled commands. Run them on specific environments for ultimate flexibility.
+يمكنك التحكم في مجدول لارافيل (Laravel scheduled). قم بتحديد البيئة التي يعمل عليها بأريحية.
 
 ```php
 $schedule->command('reports:send')
@@ -55,48 +65,58 @@ $schedule->command('reports:send')
     ->environments(['production', 'staging']);
 ```
 
-Tip given by [@LaraShout](https://twitter.com/LaraShout)
+النصيحة مقدمة من [@LaraShout](https://twitter.com/LaraShout)
 
-### Maintenance Mode
 
-If you want to enable maintenance mode on your page, execute the down Artisan command:
+<h3 id="maintenance-mode">
+وضع الصيانة
+</h3>
+
+اذا كنت تريد تفعيل وضع الصيانة في تطبيقك، نفذ الأمر التالي:
 
 ```bash
 php artisan down
 ```
+عندها سيرى الناس الصفحة الافتراضية للـ 503.
 
-Then people would see default 503 status page.
+يمكنك في نسخة لارافيل 8 والنسخ الأحدث:
 
-You may also provide flags, in Laravel 8:
+- المسار الذي يتم تحويل المستخدمين له.
+- الواجهة التي يجب أن تعرض.
+- العبارة السرية لتجاوز وضع الصيانة.
+- إعادة تحميل الصفحة كل X ثانية.
 
-- the path the user should be redirected to
-- the view that should be prerendered
-- secret phrase to bypass maintenance mode
-- retry page reload every X seconds
 
 ```bash
 php artisan down --redirect="/" --render="errors::503" --secret="1630542a-246b-4b66-afa1-dd72a4c43515" --retry=60
 ```
 
-Before Laravel 8:
+للنسخة الأقدم من لارافيل 8:
 
-- message that would be shown
-- retry page reload every X seconds
-- still allow the access to some IP address
+- الرسالة التي ستعرض
+- إعادة تحميل الصفحة كل X ثانية.
+- السماح بالوصول لعنوان IP معين.
 
 ```bash
 php artisan down --message="Upgrading Database" --retry=60 --allow=127.0.0.1
 ```
 
-When you've done the maintenance work, just run:
+عند الانتهاء من الصيانة:
 
 ```bash
 php artisan up
 ```
 
-### Artisan command help
+<h3 id="artisan-command-help">
+المساعدة بأوامر Artisan
+</h3>
 
-To check the options of artisan command, Run artisan commands with `--help` flag. For example, `php artisan make:model --help` and see how many options you have:
+لتفقد الخيارات في أمر Artisan، قم بتشغيل الأمر مع الخيار `help` كمثال عند كتابة:
+```shell
+php artisan make:model --help
+```
+
+ستظهر لك الخيارات:
 
 ```
 Options:
@@ -123,14 +143,21 @@ Options:
   -v|vv|vvv, --verbose  Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
 ```
 
-### Exact Laravel version
+<h3 id="exact-laravel-version">
+نسخة لارافيل بدقة
+</h3>
 
-Find out exactly what Laravel version you have in your app, by running command
-`php artisan --version`
+يمكنك تحديد نسخة لارافيل بالتفصيل باستعمال الأمر:
 
-### Launch Artisan command from anywhere
+```shell
+php artisan --version
+```
 
-If you have an Artisan command, you can launch it not only from Terminal, but also from anywhere in your code, with parameters. Use Artisan::call() method:
+<h3 id="launch-artisan-command-from-anywhere">
+شغل أوامر Artisan من أي مكان
+</h3>
+
+يمكن تشغيل أمر Artisan من أي مكان في تطبيقك ومع مدخلات، باستخدام دالة call في واجهة Artisan:
 
 ```php
 Route::get('/foo', function () {
@@ -142,9 +169,11 @@ Route::get('/foo', function () {
 });
 ```
 
-### Hide your custom command
+<h3 id="hide-your-custom-command">
+اخفاء الأوامر المخصصة
+</h3>
 
-If you don't want to show a specific command on the artisan command list, set `hidden` property to `true`
+اذا كنت لا تريد أن تظهر أمراً في لائحة أوامر Artisan ضع الخاصية `hidden` بالقيمة `true`
 
 ```php
 class SendMail extends Command
@@ -154,20 +183,22 @@ class SendMail extends Command
 }
 ```
 
-You won't see `send:mail` on the available commands if you typed `php artisan`
+لن يظهر الأمر `send:mail` في لائحة الأوامر عند كتابة `php artisan`.
 
-Tip given by [@sky_0xs](https://twitter.com/sky_0xs/status/1487921500023832579)
+النصيحة مقدمة من [@sky_0xs](https://twitter.com/sky_0xs/status/1487921500023832579)
 
-### Skip method
 
-Laravel the skip method in scheduler
+<h3 id="skip-method">
+الدالة Skip
+</h3>
 
-You can use `skip` in your commands to skip an execution
-
+الدالة Skip في مجدول لارافيل (Laravel scheduler) تمكنك تجاهل تنفيذ أمر.
 ```php
 $schedule->command('emails:send')->daily()->skip(function () {
     return Calendar::isHoliday();
 });
 ```
 
-Tip given by [@cosmeescobedo](https://twitter.com/cosmeescobedo/status/1494503181438492675)
+> تعليق من المترجم: سيتم تنفيذ الأمر بشكل يومي ويتجاهل أيام العطل المعادة من التعبير المنفذ (بالتالي الدالة skip تساعد على تجاهل الأيام أو الفترات في مجدول لارافيل)
+
+النصيحة مقدمة من [@cosmeescobedo](https://twitter.com/cosmeescobedo/status/1494503181438492675)
