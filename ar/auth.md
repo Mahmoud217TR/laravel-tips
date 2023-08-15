@@ -1,17 +1,19 @@
-## Auth
+## المصادقة (Auth)
 
-⬆️ [Go to main menu](README.md#laravel-tips) ⬅️ [Previous (Collections)](collections.md) ➡️ [Next (Mail)](mail.md)
+⬆️ [العودة إلى القائمة الرئيسية](README.md#laravel-tips) ➡️ [المجموعات)](collections.md) ⬅️ [التالي (البريد)](mail.md)
 
-- [Check Multiple Permissions at Once](#check-multiple-permissions-at-once)
-- [Authenticate users with more options](#authenticate-users-with-more-options)
-- [More Events on User Registration](#more-events-on-user-registration)
-- [Did you know about Auth::once()?](#did-you-know-about-authonce)
-- [Change API Token on users password update](#change-api-token-on-users-password-update)
-- [Override Permissions for Super Admin](#override-permissions-for-super-admin)
+- [تفقد عدة صلاحيات دفعة واحدة](#check-multiple-permissions-at-once)
+- [التحقق من المستخدم مع عدة خيارات](#authenticate-users-with-more-options)
+- [المزيد من الأحداث عند تسجيل مستخدم](#more-events-on-user-registration)
+- [هل تعرف Auth::once()؟](#did-you-know-about-authonce)
+- [تغيير رمز (API Token) عند تغيير كلمة المرور](#change-api-token-on-users-password-update)
+- [تخطي الصلاحيات للمسؤول الخارق](#override-permissions-for-super-admin)
 
-### Check Multiple Permissions at Once
+<h3 id="check-multiple-permissions-at-once">
+تفقد عدة صلاحيات دفعة واحدة
+</h3>
 
-In addition to `@can` Blade directive, did you know you can check multiple permissions at once with `@canany` directive?
+بالإضافة للمؤشر `@can` الخاصة بمحرك Blade، هل تعلم أنه بإمكانك تفقد عدة صلاحيات مرة واحدة باستخدام المؤشر `@canany`؟
 
 ```blade
 @canany(['update', 'view', 'delete'], $post)
@@ -20,12 +22,18 @@ In addition to `@can` Blade directive, did you know you can check multiple permi
     // The current user can create a post
 @endcanany
 ```
+> ملاحظة من المترجم: يعمل المؤشر canany عند تحقق شرط واحد فقط من الشروط.
 
-### Authenticate users with more options
+---
 
-If you only want to authenticate users that are also "activated", for example, it's as simple as passing an extra argument to `Auth::attempt()`.
 
-No need for complex middleware or global scopes.
+<h3 id="authenticate-users-with-more-options">
+التحقق من المستخدم مع عدة خيارات
+</h3>
+
+اذا كنت تريد التحقق من المستخدمين الفعالين `activated` على سبيل المثال، بكل بساطة نمرر وسيط اضافي للدالة `Auth::attempt`.
+
+لا حاجة لبرمجية وسيطة معقدة أو global scope.
 
 ```php
 Auth::attempt(
@@ -37,11 +45,17 @@ Auth::attempt(
 );
 ```
 
-Tip given by [@LukeDowning19](https://twitter.com/LukeDowning19)
+النصيحة مقدمة من [@LukeDowning19](https://twitter.com/LukeDowning19)
 
-### More Events on User Registration
+---
 
-Want to perform some actions after new user registration? Head to `app/Providers/EventServiceProvider.php` and add more Listeners classes, and then in those classes implement `handle()` method with `$event->user` object
+
+<h3 id="more-events-on-user-registration">
+المزيد من الأحداث عند تسجيل مستخدم
+</h3>
+
+هل تريد تنفيذ عدة عمليات بعد تسجيل مستخدم جديد في التطبيق؟ توجه إلى الملف `app/Providers/EventServiceProvider.php` وقم بإضافة العديد من صفوف المتنصتات (Listeners) وبعدها قم بتطبيق الدالة `handle` مع غرض من الصف `event->user`.
+
 
 ```php
 class EventServiceProvider extends ServiceProvider
@@ -56,7 +70,13 @@ class EventServiceProvider extends ServiceProvider
     ];
 ```
 
-### Did you know about Auth::once()?
+---
+
+
+<h3 id="did-you-know-about-authonce">
+هل تعرف Auth::once()؟
+</h3>
+
 
 You can login with user only for ONE REQUEST, using method `Auth::once()`.
 No sessions or cookies will be utilized, which means this method may be helpful when building a stateless API.
@@ -67,11 +87,14 @@ if (Auth::once($credentials)) {
 }
 ```
 
-### Change API Token on users password update
+<h3 id="change-api-token-on-users-password-update">
+تغيير رمز (API Token) عند تغيير كلمة المرور
+</h3>
 
-It's convenient to change the user's API Token when its password changes.
 
-Model:
+من المناسب تغيير رمز (API Token) عند تغيير المستخدم لكلمة مروره.
+
+في المودل الخاص بالمستخدم:
 
 ```php
 protected function password(): Attribute
@@ -85,9 +108,16 @@ protected function password(): Attribute
 }
 ```
 
-### Override Permissions for Super Admin
+---
 
-If you've defined your Gates but want to override all permissions for SUPER ADMIN user, to give that superadmin ALL permissions, you can intercept gates with `Gate::before()` statement, in `AuthServiceProvider.php` file.
+
+
+<h3 id="override-permissions-for-super-admin">
+تخطي الصلاحيات للمسؤول الخارق
+</h3>
+
+اذا كنت قد قمت بتعريف بوابات الحماية ولكن تريد تجاوز جميع الصلاحيات للمسؤول الخارق، واعطاءه كل الصلاحيات، يمكنك التجاوز باستخدام `Gate::before` في ملف `AuthServiceProvider.php`:
+
 
 ```php
 // Intercept any Gate and check if it's super admin
@@ -105,7 +135,8 @@ Gate::before(function($user, $ability) {
 });
 ```
 
-If you want to do something in your Gate when there is no user at all, you need to add a type hint for `$user` allowing it to be `null`. For example, if you have a role called Anonymous for your non-logged-in users:
+اذا كنت تنفيذ أي شيئ في البوابة عند عدم وجود أي مستخدم، يجب عليك الاشارة إلى `$user` والسماح لقيمته بأن تكون `null`. على سبيل المثال ليكن لديك دور مسمى مجهول، فللمستخدمين الذين لم يقومو بتسجيل الدخول:
+
 
 ```php
 Gate::before(function (?User $user, $ability) {
