@@ -13,6 +13,8 @@
 - [إصدارات واجهة برمجة التطبيقات (API Versioning).](#api-versioning)
 
 ---
+
+
 <h3 id="api-resources-with-or-without-data">
 مصادر واجهة التطبيقات (API Resources) مع أو بدون "بيانات"؟
 </h3>
@@ -39,6 +41,8 @@ class AppServiceProvider extends ServiceProvider
 النصيحة مقدمة من [@phillipmwaniki](https://twitter.com/phillipmwaniki/status/1445230637544321029)
 
 ---
+
+
 <h3 id="conditional-relationship-counts-on-api-resources">
 العد الشرطي للعلاقات في مصادر واجهة برمجة التطبيقات (API Resources)
 </h3>
@@ -62,6 +66,8 @@ public function toArray($request)
 النصيحة مقدمة من [@mvpopuk](https://twitter.com/mvpopuk/status/1570480977507504128)
 
 ---
+
+
 <h3 id="api-return-everything-went-ok">
 إعادة رد "Everything went ok"
 </h3>
@@ -83,6 +89,8 @@ public function reorder(Request $request)
 ```
 
 ---
+
+
 <h3 id="avoid-n1-queries-in-api-resources">
 تجنب مشكلة N+1 في استعلامات مصادر واجهة التطبيقات (API Resources)
 </h3>
@@ -118,6 +126,8 @@ class EmployeeResource extends JsonResource
 
 
 ---
+
+
 <h3 id="get-bearer-token-from-authorization-header">
 الحصول على Bearer Token من ترويسة التفويض (Authorization Header)
 </h3>
@@ -140,6 +150,8 @@ $token = $request->bearerToken();
 النصيحة مقدمة من [@iamharis010](https://twitter.com/iamharis010/status/1488413755826327553)
 
 ---
+
+
 <h3 id="sorting-your-api-results">
 ترتيب نتائج واجهة التطبيقات (API)
 </h3>
@@ -190,6 +202,8 @@ Route::get('dogs', function (Request $request) {
 ```
 
 ---
+
+
 <h3 id="customize-exception-handler-for-api">
 تخصيص معالج الاستثناءات (Exception Handler) لواجهة برمجة التطبيقات (API Resources)
 </h3>
@@ -228,7 +242,6 @@ Route::get('dogs', function (Request $request) {
         return parent::render($request, $exception);
     }
 ```
----
 
 #### في الاصادرا 9 من لارافيل والاصدارات الأحدث:
 
@@ -270,6 +283,8 @@ Route::get('dogs', function (Request $request) {
 النصيحة مقدمة من [Feras Elsharif](https://github.com/ferasbbm)
 
 ---
+
+
 <h3 id="force-json-response-for-api-requests">
 إجبار الرد بتنسيق JSON لطلبات واجهة برمجة التطبيقات(API Requests)
 </h3>
@@ -305,6 +320,8 @@ protected $middlewareGroups = [
 النصيحة مقدمة من [Feras Elsharif](https://github.com/ferasbbm)
 
 ---
+
+
 <h3 id="api-versioning">
 إصدارات واجهة برمجة التطبيقات (API Versioning).
 </h3>
