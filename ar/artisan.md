@@ -35,6 +35,9 @@ $name = $this->anticipate('What is your name?', ['Taylor', 'Dayle']);
 $name = $this->choice('What is your name?', ['Taylor', 'Dayle'], $defaultIndex);
 ```
 
+---
+
+
 <h3 id="execute-a-closure-after-command-runs-without-errors-or-has-any-errors">
 تنفيذ تعبير (Closure) بعد تشغيل الأمر بدون أخطاء أو إذا كانت هناك أخطاء
 </h3>
@@ -53,6 +56,9 @@ protected function schedule(Schedule $schedule)
 
 النصيحة مقدمة من [@wendell_adriel](https://twitter.com/wendell_adriel)
 
+---
+
+
 <h3 id="run-artisan-commands-on-specific-environments">
 تنفيذ أوامر Artisan في بيئة محددة
 </h3>
@@ -66,6 +72,8 @@ $schedule->command('reports:send')
 ```
 
 النصيحة مقدمة من [@LaraShout](https://twitter.com/LaraShout)
+
+---
 
 
 <h3 id="maintenance-mode">
@@ -107,6 +115,9 @@ php artisan down --message="Upgrading Database" --retry=60 --allow=127.0.0.1
 php artisan up
 ```
 
+---
+
+
 <h3 id="artisan-command-help">
 المساعدة بأوامر Artisan
 </h3>
@@ -143,6 +154,9 @@ Options:
   -v|vv|vvv, --verbose  Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
 ```
 
+---
+
+
 <h3 id="exact-laravel-version">
 نسخة لارافيل بدقة
 </h3>
@@ -152,6 +166,9 @@ Options:
 ```shell
 php artisan --version
 ```
+
+---
+
 
 <h3 id="launch-artisan-command-from-anywhere">
 شغل أوامر Artisan من أي مكان
@@ -168,6 +185,9 @@ Route::get('/foo', function () {
     //
 });
 ```
+
+---
+
 
 <h3 id="hide-your-custom-command">
 اخفاء الأوامر المخصصة
@@ -187,11 +207,12 @@ class SendMail extends Command
 
 النصيحة مقدمة من [@sky_0xs](https://twitter.com/sky_0xs/status/1487921500023832579)
 
+---
+
 
 <h3 id="skip-method">
 الدالة Skip
 </h3>
-
 الدالة Skip في مجدول لارافيل (Laravel scheduler) تمكنك تجاهل تنفيذ أمر.
 ```php
 $schedule->command('emails:send')->daily()->skip(function () {
