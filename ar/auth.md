@@ -9,6 +9,9 @@
 - [تغيير رمز (API Token) عند تغيير كلمة المرور](#change-api-token-on-users-password-update)
 - [تخطي الصلاحيات للمسؤول الخارق](#override-permissions-for-super-admin)
 
+---
+
+
 <h3 id="check-multiple-permissions-at-once">
 تفقد عدة صلاحيات دفعة واحدة
 </h3>
